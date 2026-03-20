@@ -2,10 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ArrowRight, Zap, Shield, Globe2, TrendingUp, Clock, DollarSign, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { ArrowRight, Zap, Shield, Globe2, TrendingUp, Clock, DollarSign, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants, useReducedMotion } from "framer-motion";
 
 /* ──────────────────────────────────────────
    REUSABLE ANIMATION VARIANTS
@@ -42,6 +42,10 @@ const paraWordVariant: Variants = {
    ANIMATED TEXT COMPONENTS
    ────────────────────────────────────────── */
 function AnimText({ children, className, delay = 0 }: { children: string; className?: string; delay?: number }) {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) {
+    return <span className={className}>{children}</span>;
+  }
   const words = children.split(" ");
   return (
     <motion.span
@@ -62,6 +66,10 @@ function AnimText({ children, className, delay = 0 }: { children: string; classN
 }
 
 function AnimParagraph({ children, className, delay = 0 }: { children: string; className?: string; delay?: number }) {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) {
+    return <p className={className}>{children}</p>;
+  }
   const words = children.split(" ");
   return (
     <motion.p
@@ -94,7 +102,7 @@ function Navbar() {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/80 backdrop-blur-xl shadow-lg shadow-black/20" : ""}`}>
       <div className="w-full py-4 px-8 flex flex-row items-center justify-between max-w-[1400px] mx-auto">
-        <Link href="/" className="flex items-center leading-none text-foreground font-['Geist_Sans'] hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center leading-none text-foreground hover:opacity-80 transition-opacity">
           <Image
             src="/instainject-logo.png"
             alt="InstaInject"
@@ -109,20 +117,27 @@ function Navbar() {
           />
           <span className="sr-only">InstaInject</span>
         </Link>
-        <div className="hidden md:flex flex-row items-center gap-0.5 font-['Geist_Sans']">
-          {["Why It Matters", "How It Works", "Markets", "Docs"].map((item) => (
-            <Button key={item} variant="ghost" className="text-foreground/80 text-[15px] font-normal hover:bg-primary/5 hover:text-foreground h-10 px-4 transition-colors">
-              {item} {["Why It Matters", "Docs"].includes(item) && <ChevronDown className="ml-1 h-3.5 w-3.5 opacity-40" />}
-            </Button>
-          ))}
+        <div className="hidden md:flex flex-row items-center gap-0.5">
+          <Button asChild variant="ghost" className="text-foreground/80 text-[15px] font-normal hover:bg-primary/5 hover:text-foreground h-10 px-4 transition-colors">
+            <a href="#why">Why It Matters</a>
+          </Button>
+          <Button asChild variant="ghost" className="text-foreground/80 text-[15px] font-normal hover:bg-primary/5 hover:text-foreground h-10 px-4 transition-colors">
+            <a href="#how">How It Works</a>
+          </Button>
+          <Button asChild variant="ghost" className="text-foreground/80 text-[15px] font-normal hover:bg-primary/5 hover:text-foreground h-10 px-4 transition-colors">
+            <a href="#markets">Markets</a>
+          </Button>
+          <Button asChild variant="ghost" className="text-foreground/80 text-[15px] font-normal hover:bg-primary/5 hover:text-foreground h-10 px-4 transition-colors">
+            <a href="#docs">Docs</a>
+          </Button>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/dashboard">
+          <Link href="/trade">
             <Button variant="heroSecondary" size="sm" className="rounded-full px-5 py-2 text-sm">Open Terminal</Button>
           </Link>
-          <Link href="/dashboard">
+          <Link href="/setup">
             <Button variant="hero" size="sm" className="rounded-full px-5 py-2 text-sm shadow-[0_0_20px_rgba(139,92,246,0.3)]">
-              Create Session
+              Let's Start
             </Button>
           </Link>
         </div>
@@ -158,27 +173,28 @@ function AnimCounter({ target, prefix = "", suffix = "", duration = 2000 }: { ta
     return () => obs.disconnect();
   }, [target, duration]);
 
-  return <span ref={ref}>{prefix}{value.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{prefix}{value.toLocaleString("en-US")}{suffix}</span>;
 }
 
 /* ──────────────────────────────────────────
    LIVE TICKER
    ────────────────────────────────────────── */
 function LiveTicker() {
+  const reduceMotion = useReducedMotion();
   const cities = [
-    "ETH → USDC · 1 click · 420ms",
-    "INJ → USDC · gas sponsored · 380ms",
-    "WBTC → USDC · no popup · 510ms",
-    "ARB → USDC · session key active · 460ms",
-    "SOL → stables · 1 approval / 24h · 590ms",
-    "PEPE → USDC · mobile-safe flow · 440ms",
+    "INJ/USDT · session key active · 1 click",
+    "ETH/USDT · price via relay · 5s refresh",
+    "inEVM testnet · Chain 1439 · MetaMask",
+    "ERC-4337 userOp · signed by session key",
+    "No popups per trade · after setup",
+    "Paymaster sponsorship · when funded",
   ];
   return (
     <div className="w-full overflow-hidden border-y border-border/60 bg-card/40 py-3 backdrop-blur-sm">
-      <div className="flex animate-marquee w-max">
+      <div className={reduceMotion ? "flex w-max" : "flex animate-marquee w-max"}>
         {[...cities, ...cities, ...cities].map((c, i) => (
           <div key={i} className="flex items-center gap-3 shrink-0 mx-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse" />
+            <div className={reduceMotion ? "w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]" : "w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse"} />
             <span className="text-[13px] text-foreground/60 font-mono whitespace-nowrap tracking-wide">{c}</span>
           </div>
         ))}
@@ -191,8 +207,10 @@ function LiveTicker() {
    HERO SECTION
    ────────────────────────────────────────── */
 function HeroSection() {
+  const reduceMotion = useReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
+    if (reduceMotion) return;
     const video = videoRef.current;
     if (!video) return;
     let rafId: number;
@@ -208,12 +226,23 @@ function HeroSection() {
     rafId = requestAnimationFrame(tick);
     video.play().catch(() => {});
     return () => { cancelAnimationFrame(rafId); video.removeEventListener("ended", onEnded); };
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <section className="relative w-full overflow-hidden pt-[72px]">
       {/* Animated Video Background */}
-      <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0 }} src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4" />
+      {!reduceMotion && (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0 }}
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background/90 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.12)_0%,transparent_70%)] pointer-events-none" />
       <div className="absolute top-[200px] right-0 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(99,102,241,0.1)_0%,transparent_60%)] pointer-events-none" />
@@ -228,35 +257,35 @@ function HeroSection() {
           className="liquid-glass rounded-full px-5 py-2 mb-6 flex items-center gap-2.5 text-sm"
         >
           <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse" />
-          <span className="text-foreground/70 font-['Geist_Sans']">ERC-4337 + Session Keys on Injective inEVM</span>
+          <span className="text-foreground/70">ERC-4337 + Session Keys on Injective inEVM</span>
         </motion.div>
 
         <motion.h1 
           initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           className="text-[56px] md:text-[80px] lg:text-[96px] font-bold leading-[1.02] tracking-[-0.03em] pb-2 text-transparent bg-clip-text"
-          style={{ fontFamily: "'General Sans', 'Geist Sans', sans-serif", backgroundImage: "var(--hero-gradient)" }}
+          style={{ backgroundImage: "var(--hero-gradient)" }}
         >
           The 1-Click<br />Trading Terminal
         </motion.h1>
 
         <motion.p 
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-hero-sub text-lg md:text-xl leading-relaxed max-w-xl mt-4 opacity-90 font-['Geist_Sans'] font-light"
+          className="text-hero-sub text-lg md:text-xl leading-relaxed max-w-xl mt-4 opacity-90 font-light"
         >
-          Gasless, popup-free execution on <strong className="text-foreground font-medium">Injective inEVM</strong>. Traders approve once, create a session key, and then buy or sell instantly with <strong className="text-indigo-400 font-semibold">permissions enforced on-chain in Solidity</strong>.
+          Popup-free execution on <strong className="text-foreground font-medium">Injective inEVM</strong>. Create a session once, then submit ERC-4337 user operations signed by a session key with <strong className="text-indigo-400 font-semibold">permissions enforced on-chain in Solidity</strong>.
         </motion.p>
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}
           className="flex flex-col sm:flex-row items-center gap-4 mt-8 mb-6"
         >
-          <Link href="/dashboard"><Button variant="hero" className="px-8 py-6 text-base shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:shadow-[0_0_40px_rgba(99,102,241,0.5)] transition-shadow"><Send className="mr-2 h-5 w-5" /> Launch 1-Click Terminal</Button></Link>
-          <Link href="/dashboard"><Button variant="heroSecondary" className="px-8 py-6 text-base group">See Live Demo <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" /></Button></Link>
+          <Link href="/setup"><Button variant="hero" className="px-8 py-6 text-base shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:shadow-[0_0_40px_rgba(99,102,241,0.5)] transition-shadow"><Send className="mr-2 h-5 w-5" /> Let's Start</Button></Link>
+          <Link href="/trade"><Button variant="heroSecondary" className="px-8 py-6 text-base group">Open Terminal <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" /></Button></Link>
         </motion.div>
 
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.8 }}
-          className="flex flex-wrap justify-center items-center gap-3 text-[13px] text-foreground/50 font-['Geist_Sans'] mb-12"
+          className="flex flex-wrap justify-center items-center gap-3 text-[13px] text-foreground/50 mb-12"
         >
           {[
             { icon: <Shield className="h-3.5 w-3.5" />, label: "Session Keys" },
@@ -278,14 +307,14 @@ function HeroSection() {
    ────────────────────────────────────────── */
 function StatsStrip() {
   const stats = [
-    { value: 1, prefix: "", suffix: "", label: "Signature To Start", icon: <TrendingUp className="h-5 w-5 text-primary" /> },
-    { value: 24, prefix: "", suffix: "h", label: "Session Window", icon: <Clock className="h-5 w-5 text-sky-400" /> },
-    { value: 0, prefix: "", suffix: "", label: "Native Gas Token Needed", icon: <DollarSign className="h-5 w-5 text-emerald-400" /> },
-    { value: 100, prefix: "", suffix: "%", label: "Permissions Enforced On-Chain", icon: <CheckCircle2 className="h-5 w-5 text-emerald-400" /> },
+    { value: 24, prefix: "", suffix: "h", label: "Default Session Window", icon: <Clock className="h-5 w-5 text-emerald-400" /> },
+    { value: 0, prefix: "", suffix: "", label: "Popups Per Trade", icon: <Zap className="h-5 w-5 text-primary" /> },
+    { value: 5, prefix: "", suffix: "s", label: "Price Refresh (Relay)", icon: <TrendingUp className="h-5 w-5 text-sky-400" /> },
+    { value: 1439, prefix: "", suffix: "", label: "inEVM Testnet Chain ID", icon: <Shield className="h-5 w-5 text-emerald-400" /> },
   ];
 
   return (
-    <section className="w-full py-16 px-4">
+    <section className="w-full py-16 px-4 scroll-mt-24" id="why">
       <motion.div 
         variants={staggerContainer}
         initial="hidden"
@@ -305,7 +334,7 @@ function StatsStrip() {
             <div className="text-3xl md:text-4xl font-bold font-mono text-foreground tracking-tight">
               <AnimCounter target={s.value} prefix={s.prefix} suffix={s.suffix} />
             </div>
-            <div className="text-[13px] text-muted-foreground font-['Geist_Sans']">{s.label}</div>
+            <div className="text-[13px] text-muted-foreground">{s.label}</div>
           </motion.div>
         ))}
       </motion.div>
@@ -318,24 +347,24 @@ function StatsStrip() {
    ────────────────────────────────────────── */
 function HowItWorks() {
   const steps = [
-    { num: "01", title: "Create Your Smart Account", desc: "Connect once and deposit trading funds into your ERC-4337 account.", icon: <Shield className="h-6 w-6" /> },
-    { num: "02", title: "Approve A Session Key", desc: "Sign one permissioned session with clear limits for the next 24 hours.", icon: <DollarSign className="h-6 w-6" /> },
-    { num: "03", title: "Trade In One Click", desc: "Buy or sell instantly without MetaMask popups, approvals, or repeat signatures.", icon: <Zap className="h-6 w-6" /> },
-    { num: "04", title: "Settle Gas Invisibly", desc: "A paymaster sponsors gas or lets the user settle fees in stablecoins.", icon: <CheckCircle2 className="h-6 w-6" /> },
+    { num: "01", title: "Connect Wallet", desc: "Connect MetaMask on Injective inEVM testnet (Chain 1439).", icon: <Shield className="h-6 w-6" /> },
+    { num: "02", title: "Deposit Once", desc: "Deposit native INJ to the vault contract (one popup step).", icon: <DollarSign className="h-6 w-6" /> },
+    { num: "03", title: "Start a Session", desc: "Register a session key on-chain with limits (duration, max size, allowed pairs).", icon: <CheckCircle2 className="h-6 w-6" /> },
+    { num: "04", title: "Trade via ERC-4337", desc: "Submit trades as user operations signed by the session key; a relay tracks confirmation.", icon: <TrendingUp className="h-6 w-6" /> },
   ];
 
   return (
-    <section className="w-full py-20 px-4">
+    <section className="w-full py-20 px-4 scroll-mt-24" id="how">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-1.5 text-xs text-foreground/60 font-mono uppercase tracking-widest mb-6 border border-[var(--card-border)]">
             <Clock className="h-3 w-3" /> How It Works
           </motion.div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-['General_Sans',sans-serif] text-foreground block">
-            <AnimText>Approve once. Trade all day.</AnimText>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground block">
+            <AnimText>Session-based trading, end to end.</AnimText>
           </h2>
-          <AnimParagraph className="text-muted-foreground mt-4 text-lg max-w-lg mx-auto font-['Geist_Sans']" delay={0.3}>
-            This removes the slowest part of every DEX: approval popups, gas checks, and repeated wallet signing.
+          <AnimParagraph className="text-muted-foreground mt-4 text-lg max-w-lg mx-auto" delay={0.3}>
+            This demo focuses on the low-friction execution path: one setup, then popup-free trades using ERC-4337 + session keys.
           </AnimParagraph>
         </div>
 
@@ -354,8 +383,8 @@ function HowItWorks() {
                   {step.icon}
                 </div>
               </div>
-              <h3 className="text-lg font-semibold text-foreground font-['Geist_Sans'] leading-snug">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed font-['Geist_Sans']">{step.desc}</p>
+              <h3 className="text-lg font-semibold text-foreground leading-snug">{step.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -369,12 +398,12 @@ function HowItWorks() {
    ────────────────────────────────────────── */
 function WhyAfriFi() {
   const features = [
-    { icon: <Zap className="h-7 w-7" />, title: "Popup-Free Execution", desc: "After the session is created, trades execute from the terminal without repeated MetaMask interruptions.", highlight: "1 click", highlightColor: "text-emerald-400" },
-    { icon: <Shield className="h-7 w-7" />, title: "Solidity-Enforced Permissions", desc: "The session key is scoped on-chain with trading limits, so this is not just a frontend shortcut.", highlight: "On-chain rules", highlightColor: "text-primary" },
-    { icon: <DollarSign className="h-7 w-7" />, title: "No Gas Token Trap", desc: "Users can trade even with zero native gas because ERC-4337 paymasters sponsor or abstract the fee flow.", highlight: "USDC gas", highlightColor: "text-emerald-400" },
-    { icon: <TrendingUp className="h-7 w-7" />, title: "Fewer Missed Trades", desc: "Removing approvals and signature latency cuts the slippage and failed fills that kill fast-moving trades.", highlight: "Lower friction", highlightColor: "text-sky-400" },
-    { icon: <Globe2 className="h-7 w-7" />, title: "Mobile-First UX", desc: "No browser-to-wallet app ping-pong, fewer disconnects, and a flow that feels closer to modern trading apps.", highlight: "No app switching", highlightColor: "text-amber-400" },
-    { icon: <Send className="h-7 w-7" />, title: "Built On Fresh Infra", desc: "Injective inEVM launched in November 2025, so we are shipping on infrastructure that is only four months old.", highlight: "New infra", highlightColor: "text-sky-400" },
+    { icon: <Zap className="h-7 w-7" />, title: "No popup trades", desc: "After setup, trades are submitted without MetaMask confirmation prompts.", highlight: "Low-friction", highlightColor: "text-emerald-400" },
+    { icon: <Shield className="h-7 w-7" />, title: "Session key limits", desc: "Permissions (duration, max size, allowed pairs) are enforced on-chain by the smart account.", highlight: "On-chain permissions", highlightColor: "text-sky-400" },
+    { icon: <Send className="h-7 w-7" />, title: "ERC-4337 execution", desc: "Trades are encoded as smart-account calls and sent as ERC-4337 user operations.", highlight: "Account abstraction", highlightColor: "text-primary" },
+    { icon: <TrendingUp className="h-7 w-7" />, title: "Relay-fed prices", desc: "Mid-price and chart data are fetched from a relay endpoint (orderbook API).", highlight: "Relay orderbook", highlightColor: "text-amber-400" },
+    { icon: <DollarSign className="h-7 w-7" />, title: "Sponsored gas (optional)", desc: "If the paymaster is funded, gas can be sponsored for a ‘gasless feel’ during trades.", highlight: "Paymaster", highlightColor: "text-emerald-400" },
+    { icon: <CheckCircle2 className="h-7 w-7" />, title: "Explorer verification", desc: "When a userOp is confirmed, the relay can return a tx hash you can verify in an explorer.", highlight: "Tx receipts", highlightColor: "text-sky-400" },
   ];
 
   return (
@@ -384,11 +413,14 @@ function WhyAfriFi() {
       <div className="max-w-[1100px] mx-auto relative z-10">
         <div className="text-center mb-16">
           <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-1.5 text-xs text-foreground/60 font-mono uppercase tracking-widest mb-6">
-            <Zap className="h-3 w-3" /> Why AfriFi
+            <Zap className="h-3 w-3" /> Why It Matters
           </motion.div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-['General_Sans',sans-serif] text-foreground block">
-            <AnimText>Why this matters for real traders.</AnimText>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground block">
+            <AnimText>Why this matters for African merchants.</AnimText>
           </h2>
+          <AnimParagraph className="text-muted-foreground mt-4 text-lg max-w-2xl mx-auto" delay={0.25}>
+            High fees, slow settlement, and low trust hurt micro-merchant margins. We use Injective’s on-chain primitives to make matching transparent and settlement verifiable.
+          </AnimParagraph>
         </div>
 
         <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -397,10 +429,10 @@ function WhyAfriFi() {
               <div className="w-12 h-12 rounded-xl bg-[color:var(--surface-tint)] flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                 {f.icon}
               </div>
-              <h3 className="text-xl font-semibold text-foreground font-['Geist_Sans']">
+              <h3 className="text-xl font-semibold text-foreground">
                 <AnimText>{f.title}</AnimText>
               </h3>
-              <AnimParagraph className="text-sm text-muted-foreground leading-relaxed font-['Geist_Sans'] flex-1" delay={0.1}>{f.desc}</AnimParagraph>
+              <AnimParagraph className="text-sm text-muted-foreground leading-relaxed flex-1" delay={0.1}>{f.desc}</AnimParagraph>
               <div className={`text-sm font-mono font-semibold ${f.highlightColor} flex items-center gap-1.5`}>
                 <ArrowUpRight className="h-3.5 w-3.5" /> {f.highlight}
               </div>
@@ -417,11 +449,11 @@ function WhyAfriFi() {
    ────────────────────────────────────────── */
 function FeeComparison() {
   const providers = [
-    { name: "Standard DEX", fee: 4, time: "15-30s to trade", color: "bg-red-500/80" },
+    { name: "Standard DEX", fee: 4, time: "multiple prompts", color: "bg-red-500/80" },
     { name: "Approval + Swap Flow", fee: 3, time: "2 signatures", color: "bg-amber-500/80" },
     { name: "Mobile Wallet Loop", fee: 5, time: "context switching", color: "bg-slate-500/80" },
-    { name: "No Gas Token", fee: 2, time: "trade blocked", color: "bg-orange-500/80" },
-    { name: "AfriFi 1-Click", fee: 1, time: "< 1s execution", color: "bg-emerald-500", special: true },
+    { name: "No Gas Token", fee: 2, time: "blocked unless funded", color: "bg-orange-500/80" },
+    { name: "AfriFi 1-Click", fee: 1, time: "after setup", color: "bg-emerald-500", special: true },
   ];
 
   return (
@@ -431,7 +463,7 @@ function FeeComparison() {
           <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-1.5 text-xs text-foreground/60 font-mono uppercase tracking-widest mb-6">
             <DollarSign className="h-3 w-3" /> Friction Comparison
           </motion.div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-['General_Sans',sans-serif] text-foreground block">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground block">
             <AnimText>From four prompts to one click.</AnimText>
           </h2>
         </div>
@@ -440,7 +472,7 @@ function FeeComparison() {
           {providers.map((p, i) => (
             <motion.div key={p.name} variants={fadeInUp} className={`flex items-center gap-4 ${p.special ? "bg-emerald-500/[0.06] border border-emerald-500/20 rounded-xl p-4 -mx-2" : "px-2"}`}>
               <div className="w-[140px] shrink-0">
-                <div className={`text-sm font-semibold font-['Geist_Sans'] ${p.special ? "text-emerald-400" : "text-foreground/70"}`}>{p.name}</div>
+                <div className={`text-sm font-semibold ${p.special ? "text-emerald-400" : "text-foreground/70"}`}>{p.name}</div>
               </div>
               <div className="flex-1 h-8 bg-card/60 rounded-lg overflow-hidden relative border border-border/50">
                 <motion.div
@@ -471,21 +503,24 @@ function FeeComparison() {
    ────────────────────────────────────────── */
 function Corridors() {
   const corridors = [
-    { market: "ETH / USDC", note: "Fast spot execution with sponsored gas" },
-    { market: "INJ / USDC", note: "Native ecosystem pair for Injective users" },
-    { market: "WBTC / USDC", note: "Trade major assets without popup fatigue" },
-    { market: "WETH / INJ", note: "Multi-asset routing from one active session" },
-    { market: "USDC / USDT", note: "Stable rebalancing without native gas" },
-    { market: "High-volatility memes", note: "Best where every second matters most" },
+    { market: "Fast trading UIs", note: "Session-based execution with minimal prompts" },
+    { market: "Mobile-first flows", note: "Fewer context switches and confirmations" },
+    { market: "Bots / agents", note: "Session key limits help bound automated actions" },
+    { market: "Hackathon demos", note: "Clear AA primitives + explorer verifiability" },
+    { market: "Sponsored UX", note: "Paymaster funding can sponsor gas when configured" },
+    { market: "Future extensions", note: "Marketplace + escrow can be built on top later" },
   ];
 
   return (
-    <section className="w-full py-20 px-4">
+    <section className="w-full py-20 px-4 scroll-mt-24" id="markets">
       <div className="max-w-[1100px] mx-auto">
         <div className="text-center mb-14">
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-['General_Sans',sans-serif] text-foreground block">
-            <AnimText>One session. Many markets.</AnimText>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground block">
+            <AnimText>Where this UX fits best.</AnimText>
           </h2>
+          <AnimParagraph className="text-muted-foreground mt-4 text-lg max-w-2xl mx-auto" delay={0.2}>
+            This MVP is focused on the account-abstraction execution path (session keys + ERC-4337) and a relay-fed price view.
+          </AnimParagraph>
         </div>
         <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {corridors.map((c, i) => (
@@ -496,7 +531,7 @@ function Corridors() {
                 </div>
               </div>
               <div className="text-right flex-1">
-                <div className="text-sm font-semibold text-foreground font-['Geist_Sans']">{c.market}</div>
+                <div className="text-sm font-semibold text-foreground">{c.market}</div>
                 <div className="text-xs text-muted-foreground mt-1">{c.note}</div>
               </div>
             </motion.div>
@@ -517,17 +552,78 @@ function SocialProofSection() {
     <section className="relative w-full overflow-hidden">
       <div className="relative z-10 flex flex-col items-center pt-8 pb-24 px-4 w-full">
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 1 }} className="mt-8 flex w-full max-w-5xl flex-col items-center gap-8 overflow-hidden border-t border-border/60 pt-16 md:flex-row md:gap-12">
-          <div className="text-foreground/50 text-sm whitespace-nowrap shrink-0 font-['Geist_Sans'] text-center md:text-left">Building with the best<br className="hidden md:block" /> protocols & partners</div>
+          <div className="text-foreground/50 text-sm whitespace-nowrap shrink-0 text-center md:text-left">Building with the best<br className="hidden md:block" /> protocols & partners</div>
           <div className="flex-1 overflow-hidden relative flex" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }}>
             <div className="flex animate-marquee w-max">
               {[...logos, ...logos, ...logos, ...logos].map((b, i) => (
                 <div key={i} className="flex items-center gap-3 shrink-0 mx-8">
                   <div className="liquid-glass w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-accent shadow-sm">{b.letter}</div>
-                  <span className="text-[15px] font-semibold text-foreground font-['Geist_Sans'] tracking-tight">{b.name}</span>
+                  <span className="text-[15px] font-semibold text-foreground tracking-tight">{b.name}</span>
                 </div>
               ))}
             </div>
           </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ──────────────────────────────────────────
+   DOCS / INJECTIVE LINKS
+   ────────────────────────────────────────── */
+function DocsSection() {
+  const links = [
+    {
+      title: "Injective Website",
+      desc: "Learn about the ecosystem and core primitives we build on.",
+      href: "https://injective.com/",
+    },
+    {
+      title: "Injective Docs",
+      desc: "Reference docs for building, deploying, and integrating.",
+      href: "https://docs.injective.network/",
+    },
+    {
+      title: "Explorer",
+      desc: "Verify transactions, contracts, and on-chain receipts.",
+      href: "https://explorer.injective.network/",
+    },
+  ];
+
+  return (
+    <section className="w-full py-20 px-4 scroll-mt-24" id="docs">
+      <div className="max-w-[1100px] mx-auto">
+        <div className="text-center mb-14">
+          <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-1.5 text-xs text-foreground/60 font-mono uppercase tracking-widest mb-6">
+            <ArrowUpRight className="h-3 w-3" /> Built on Injective
+          </motion.div>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground block">
+            <AnimText>Docs and proof links.</AnimText>
+          </h2>
+          <AnimParagraph className="text-muted-foreground mt-4 text-lg max-w-2xl mx-auto" delay={0.2}>
+            For the hackathon demo we surface the references judges care about: docs, explorer verifiability, and a clear path to deployed proof points.
+          </AnimParagraph>
+        </div>
+
+        <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {links.map((l) => (
+            <motion.a
+              key={l.href}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              variants={fadeInUp}
+              className="liquid-glass rounded-2xl p-6 flex flex-col gap-3 hover:bg-[color:var(--surface-tint)] transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold text-foreground">{l.title}</div>
+                <ArrowUpRight className="h-4 w-4 text-foreground/50" />
+              </div>
+              <div className="text-sm text-muted-foreground leading-relaxed">{l.desc}</div>
+              <div className="text-xs font-mono text-foreground/60 break-all">{l.href}</div>
+            </motion.a>
+          ))}
         </motion.div>
       </div>
     </section>
@@ -542,13 +638,15 @@ function CTAFooter() {
     <section className="w-full py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.1)_0%,transparent_60%)] pointer-events-none" />
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInUp} className="max-w-[700px] mx-auto text-center relative z-10">
-        <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-['General_Sans',sans-serif] text-foreground mb-5 block">
+        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-5 block">
           <AnimText>Ready to trade without wallet friction?</AnimText>
         </h2>
-        <AnimParagraph className="text-muted-foreground text-lg mb-10 font-['Geist_Sans']" delay={0.3}>Show judges, users, and clients what Web3 feels like when approvals, popups, and native gas requirements disappear.</AnimParagraph>
+        <AnimParagraph className="text-muted-foreground text-lg mb-10" delay={0.3}>Start with a session, then trade via ERC-4337 user operations. Gas sponsorship is available when the paymaster is funded.</AnimParagraph>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/dashboard"><Button variant="hero" className="px-10 py-6 text-base shadow-[0_0_30px_rgba(139,92,246,0.3)]"><Send className="mr-2 h-5 w-5" /> Launch Terminal</Button></Link>
-          <Button variant="heroSecondary" className="px-8 py-6 text-base">Read the Docs</Button>
+          <Link href="/setup"><Button variant="hero" className="px-10 py-6 text-base shadow-[0_0_30px_rgba(139,92,246,0.3)]"><Send className="mr-2 h-5 w-5" /> Let's Start</Button></Link>
+          <Button asChild variant="heroSecondary" className="px-8 py-6 text-base">
+            <a href="https://docs.injective.network/" target="_blank" rel="noopener noreferrer">Injective Docs</a>
+          </Button>
         </div>
       </motion.div>
     </section>
@@ -560,7 +658,10 @@ function CTAFooter() {
    ────────────────────────────────────────── */
 export default function Home() {
   return (
-    <main className="w-full min-h-screen bg-background font-['Geist_Sans'] text-foreground selection:bg-primary/20 selection:text-primary">
+    <main
+      data-home-theme-lock="dark"
+      className="w-full min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary"
+    >
       <Navbar />
       <HeroSection />
       <StatsStrip />
@@ -569,6 +670,7 @@ export default function Home() {
       <FeeComparison />
       <Corridors />
       <SocialProofSection />
+      <DocsSection />
       <CTAFooter />
     </main>
   );

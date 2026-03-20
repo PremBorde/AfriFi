@@ -191,7 +191,7 @@ export default function SendForm({ oracleRate = 1455, onSendSuccess, onNewTransa
 
         {/* Oracle rate label */}
         <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "16px", fontFamily: "'IBM Plex Mono', monospace" }}>
-          Oracle Rate: 1 USDC = {oracleRate.toLocaleString()} NGN
+          Oracle Rate: 1 USDC = {oracleRate.toLocaleString("en-US")} NGN
         </div>
 
         {/* Error */}

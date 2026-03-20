@@ -62,7 +62,7 @@ function CustomTooltip({
     }}>
       <div style={{ color: "var(--text-muted)", marginBottom: "4px" }}>{label}</div>
       <div style={{ color: "var(--accent-blue)", fontWeight: 600 }}>
-        ${payload[0].value.toLocaleString()}
+        ${payload[0].value.toLocaleString("en-US")}
       </div>
     </div>
   );
@@ -210,6 +210,8 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
   const cy = size / 2;
   let cumulative = 0;
 
+  const f = (n: number) => n.toFixed(6);
+
   const slices = data.map((d) => {
     const startAngle = (cumulative / 100) * 2 * Math.PI - Math.PI / 2;
     cumulative += d.value;
@@ -220,7 +222,7 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
     const y2 = cy + r * Math.sin(endAngle);
     const largeArc = d.value > 50 ? 1 : 0;
     return {
-      path: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`,
+      path: `M ${f(cx)} ${f(cy)} L ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 ${largeArc} 1 ${f(x2)} ${f(y2)} Z`,
       color: d.color,
       name: d.name,
     };

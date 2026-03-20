@@ -26,19 +26,21 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`} style={{ background: "var(--bg-deep)", color: "var(--text-primary)" }}>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
+                  var isHome = false;
+                  try {
+                    isHome = window.location && window.location.pathname === '/';
+                  } catch (e) {}
+
                   var stored = localStorage.getItem('theme');
-                  if (stored === 'dark') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                  } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                  }
+                  var next = isHome ? 'dark' : (stored === 'dark' ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-theme', next);
                 } catch (e) {}
               })();
             `,

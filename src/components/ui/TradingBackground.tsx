@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useTheme } from "@/components/layout/ThemeContext";
 
 type Candle = {
@@ -39,8 +40,15 @@ function makeCandle(x: number, baseY: number): Candle {
 export default function TradingBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { theme } = useTheme();
+  const pathname = usePathname();
+  const effectiveTheme = pathname === "/" ? "dark" : theme;
 
   useEffect(() => {
+    // Accessibility/perf: if the user prefers reduced motion, don't animate.
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -71,9 +79,9 @@ export default function TradingBackground() {
         const x = (c.x + offset) % (canvas.width + CANDLE_W + GAP) - CANDLE_W;
         const isBull = c.close < c.open; // close lower = going up visually
         const color = isBull
-          ? theme === "light" ? "#10B981" : "#10B981"
-          : theme === "light" ? "#F97316" : "#F43F5E";
-        const alphaScale = theme === "light" ? 0.6 : 1;
+          ? effectiveTheme === "light" ? "#10B981" : "#10B981"
+          : effectiveTheme === "light" ? "#F97316" : "#F43F5E";
+        const alphaScale = effectiveTheme === "light" ? 0.6 : 1;
 
         ctx.globalAlpha = c.opacity * alphaScale;
 
@@ -116,7 +124,7 @@ export default function TradingBackground() {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
     };
-  }, [theme]);
+  }, [effectiveTheme]);
 
   return (
     <canvas

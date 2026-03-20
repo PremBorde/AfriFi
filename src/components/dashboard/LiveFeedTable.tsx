@@ -102,9 +102,9 @@ export default function LiveFeedTable({ newTx, onRowClick }: Props) {
               >
                 <td className="mono" style={{ fontSize: "12px", color: "var(--text-muted)" }}>{tx.sender}</td>
                 <td className="mono" style={{ fontSize: "12px", color: "var(--text-muted)" }}>{tx.recipient}</td>
-                <td className="mono" style={{ fontWeight: 600 }}>${tx.amount.toLocaleString()}</td>
+                <td className="mono" style={{ fontWeight: 600 }}>${tx.amount.toLocaleString("en-US")}</td>
                 <td className="mono" style={{ color: "var(--accent-green)", fontSize: "12px" }}>
-                  {tx.fiatValue.toLocaleString()} {tx.fiatCur}
+                  {tx.fiatValue.toLocaleString("en-US")} {tx.fiatCur}
                 </td>
                 <td>{statusBadge(tx.status)}</td>
                 <td style={{ fontSize: "11px", color: "var(--text-muted)" }}>{tx.timestamp}</td>

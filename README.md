@@ -10,6 +10,13 @@ AfriFi is a production-grade Next.js UI for an **ERC-4337 + session-key trading 
 - `/trade` — Trading terminal
 - `/portfolio` — Portfolio + session controls
 
+Reality check:
+
+- `/dashboard` uses simulated activity/metrics for the “live tape” experience.
+- `/trade` prices (mid price + chart) are fetched from a relay (`NEXT_PUBLIC_RELAY_URL`).
+- Trades are submitted as ERC-4337 user operations to the relay; confirmation status + `txHash` come back from the relay.
+- `/portfolio` trade history is stored in browser `sessionStorage` (demo UX), not indexed from chain.
+
 ## Tech Stack
 
 - Next.js (App Router)
@@ -18,6 +25,7 @@ AfriFi is a production-grade Next.js UI for an **ERC-4337 + session-key trading 
 - Tailwind CSS v4
 - Ethers v6
 - Recharts + Three/Globe visualizations
+- Shadcn-style UI conventions (custom buttons live in `src/components/ui`)
 
 ## Prerequisites
 
@@ -70,6 +78,20 @@ npm run dev
 
 Open http://localhost:3000
 
+## UI / Components (Shadcn + Tailwind conventions)
+This repo uses a “shadcn-like” structure for reusable UI pieces and composes them in the feature pages.
+
+- Reusable components:
+  - `src/components/ui/` (default place for shadcn-style primitives and app-specific animated buttons)
+  - `src/components/ui/button.tsx` (base button primitives)
+  - `src/components/ui/interactive-hover-button.tsx` (setup action button with buffering/loading visual)
+  - `src/components/ui/animated-generate-button-shadcn-tailwind.tsx` (1-click Buy/Sell animated button)
+- App/page composition:
+  - `src/components/dex/*` and `src/components/dex-pages/*` build the trading UI using the shared components above.
+- Theming:
+  - `src/app/globals.css` defines the light/dark tokens (`--background`, `--foreground`, etc.).
+  - When adding UI elements, prefer token-based colors so light mode stays readable.
+
 ## Production Build
 
 ```bash
@@ -86,6 +108,36 @@ npm run lint
 ## Assets
 
 - App logo is served from `public/instainject-logo.png`.
+
+## Custom Buttons Used in This UI
+### `InteractiveHoverButton`
+Location: `src/components/ui/interactive-hover-button.tsx`
+
+Use this for Setup-page actions like `Connect Wallet`, `Deposit`, `Add Stake`, and similar flows.
+
+Props:
+- `text` (idle label)
+- `loadingText` (while connecting/buffering)
+- `successText` (after success)
+- `classes` (optional extra Tailwind classes)
+
+### `AnimatedGenerateButton`
+Location: `src/components/ui/animated-generate-button-shadcn-tailwind.tsx`
+
+Use this for “1-click” actions like `1-CLICK BUY` / `1-CLICK SELL`.
+
+Props:
+- `generating` (shows loading/buffering state)
+- `labelIdle` (idle text)
+- `labelActive` (loading text)
+- `highlightHueDeg` (accent color hue per action)
+
+## Dependencies to Keep
+Button animations rely on:
+- `lucide-react`
+- `framer-motion`
+- `clsx`
+- `tailwind-merge`
 
 ## Troubleshooting
 

@@ -198,6 +198,7 @@ function TradePanel(props: {
                     labelActive={props.side === "BUY" ? "BUYING..." : "SELLING..."}
                     generating={props.pending}
                     highlightHueDeg={props.side === "BUY" ? 215 : 350}
+                    showIcon={false}
                     disabled={props.pending}
                     onClick={() => props.onSubmit()}
                 />

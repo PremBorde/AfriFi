@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import type { Tx } from "./LiveFeedTable";
 import { CheckCircle2, Copy, ExternalLink, QrCode } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,14 @@ export default function TxModal({ tx, onClose }: Props) {
 
   const handleCopy = (text: string) => navigator.clipboard.writeText(text);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
@@ -28,11 +36,17 @@ export default function TxModal({ tx, onClose }: Props) {
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           className="relative w-full max-w-[400px] flex flex-col"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tx-modal-title"
         >
           {/* Close Button float */}
           <button 
+            type="button"
             onClick={onClose} 
             className="absolute -top-12 right-0 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--surface-strong)] text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-soft)]"
+            aria-label="Close transaction receipt"
+            autoFocus
           >
             ✕
           </button>
@@ -47,14 +61,14 @@ export default function TxModal({ tx, onClose }: Props) {
               <QrCode className="w-8 h-8 text-primary/80" />
             </div>
 
-            <h2 className="text-xl font-bold font-['Geist_Sans'] text-foreground tracking-tight mb-1">Transaction Receipt</h2>
+            <h2 id="tx-modal-title" className="text-xl font-bold text-foreground tracking-tight mb-1">Transaction Receipt</h2>
             <p className="text-xs text-muted-foreground font-mono mb-6">{new Date().toLocaleString()}</p>
 
             <div className="my-4 w-full border-t-2 border-dashed border-[var(--card-border)]" />
 
             <div className="flex flex-col items-center w-full gap-1 mb-6">
               <span className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">Amount Sent</span>
-              <span className="text-4xl font-black font-mono tracking-tighter text-foreground">${tx.amount.toLocaleString()}</span>
+              <span className="text-4xl font-black font-mono tracking-tighter text-foreground">${tx.amount.toLocaleString("en-US")}</span>
               <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded mt-1 font-mono">0.00 INJ GAS</span>
             </div>
 
@@ -78,20 +92,30 @@ export default function TxModal({ tx, onClose }: Props) {
                </div>
                <div className="flex justify-between">
                  <span className="text-muted-foreground">LOCAL FIAT</span>
-                 <span className="text-foreground">{tx.fiatValue.toLocaleString()} {tx.fiatCur}</span>
+                 <span className="text-foreground">{tx.fiatValue.toLocaleString("en-US")} {tx.fiatCur}</span>
                </div>
-               <div className="flex justify-between items-center group cursor-pointer" onClick={() => handleCopy(claimCode)}>
+               <button
+                 type="button"
+                 className="flex w-full items-center justify-between group cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                 onClick={() => handleCopy(claimCode)}
+                 aria-label="Copy claim code"
+               >
                  <span className="text-muted-foreground">CLAIM CODE</span>
                  <span className="text-primary font-bold flex items-center gap-1 group-hover:underline">
                    {claimCode} <Copy className="w-3 h-3" />
                  </span>
-               </div>
+               </button>
                <div className="flex justify-between flex-col gap-1 mt-2">
                  <span className="text-muted-foreground">NETWORK HASH</span>
-                 <div className="group flex cursor-pointer items-center justify-between rounded border border-[var(--card-border)] bg-[var(--surface-strong)] p-2" onClick={() => handleCopy(tx.txHash)}>
+                 <button
+                   type="button"
+                   className="group flex w-full cursor-pointer items-center justify-between rounded border border-[var(--card-border)] bg-[var(--surface-strong)] p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                   onClick={() => handleCopy(tx.txHash)}
+                   aria-label="Copy network hash"
+                 >
                    <span className="text-foreground/80 truncate pr-4">{tx.txHash}</span>
                    <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
-                 </div>
+                 </button>
                </div>
             </div>
 

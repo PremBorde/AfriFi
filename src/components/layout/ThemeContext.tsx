@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Theme = "light" | "dark";
 
@@ -12,26 +13,34 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [theme, setTheme] = useState<Theme>("light"); // Default to light
 
   useEffect(() => {
-    // Read from localStorage on mount. 
-    // The blocking script in layout.tsx prevents the initial flash.
-    const stored = localStorage.getItem("theme") as Theme;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.setAttribute("data-theme", stored);
-    } else {
-      document.documentElement.setAttribute("data-theme", "light");
+    // Home is always dark, regardless of stored user preference.
+    if (pathname === "/") {
+      setTheme("dark");
+      document.documentElement.setAttribute("data-theme", "dark");
+      return;
     }
-  }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+    // Other routes: read from localStorage on mount/route-change.
+    // The blocking script in layout.tsx prevents the initial flash.
+    const stored = localStorage.getItem("theme");
+    const nextTheme: Theme = stored === "dark" ? "dark" : "light";
+    setTheme(nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  }, [pathname]);
+
+  const toggleTheme = useCallback(() => {
+    // Don't allow theme changes on Home (it must remain dark).
+    if (pathname === "/") return;
+
+    const newTheme: Theme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-  };
+  }, [pathname, theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
