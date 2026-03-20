@@ -196,21 +196,6 @@ export default function DashboardPage() {
             <div className="min-h-[280px] flex-1">
               <GlobeVisualizer
                 flashTrigger={globeFlash}
-                onArcClick={(arc) => {
-                  // Create a pseudo Tx from an arc click
-                  const pseudoTx: Tx = {
-                    id:        arc.id,
-                    sender:    arc.from.city,
-                    recipient: arc.to.city,
-                    amount:    parseInt(arc.amount.replace(/\D/g, "")),
-                    fiatValue: parseInt(arc.amount.replace(/\D/g, "")) * 1455,
-                    fiatCur:   "NGN",
-                    status:    arc.status,
-                    timestamp: new Date().toLocaleString(),
-                    txHash:    `0x${arc.id}deadbeef0000000000000000000000000000000000000000000000000000`,
-                  };
-                  setSelectedTx(pseudoTx);
-                }}
               />
             </div>
           </div>
