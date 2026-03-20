@@ -27,7 +27,7 @@ export default function LiveTransferList({ latestTransfer }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
       <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
-        Active Transfers
+        Active Orders
       </div>
       <div className="flex flex-col gap-2 relative">
         <AnimatePresence initial={false}>
@@ -38,7 +38,17 @@ export default function LiveTransferList({ latestTransfer }: Props) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.4, type: "spring", bounce: 0.4 }}
-              className="bg-deep rounded-xl p-3 flexItems-center gap-3 border border-slate-800/50 hover:border-slate-700 transition-colors w-full flex"
+              style={{
+                padding: "12px",
+                borderRadius: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                width: "100%",
+                background: "var(--surface-strong)",
+                border: "1px solid var(--card-border)",
+                boxShadow: "0 8px 20px rgba(15, 23, 42, 0.04)",
+              }}
             >
               {/* Avatar */}
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-lg shrink-0 ${tx.from.color || "bg-primary"}`}>
@@ -57,7 +67,7 @@ export default function LiveTransferList({ latestTransfer }: Props) {
                     {tx.amount}
                   </span>
                   {tx.status === "COMPLETED"
-                    ? <div className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-500/20">SETTLED</div>
+                    ? <div className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded border border-emerald-500/20">FILLED</div>
                     : <div className="text-[9px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-500/20 animate-pulse">PENDING</div>}
                 </div>
               </div>

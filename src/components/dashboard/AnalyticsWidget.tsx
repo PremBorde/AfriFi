@@ -23,8 +23,8 @@ export default function AnalyticsWidget() {
       
       <div className="flex justify-between items-start mb-6 relative z-10">
         <div>
-          <h3 className="text-foreground font-semibold font-['Geist_Sans'] text-lg">Personal Fee Savings</h3>
-          <p className="text-muted-foreground text-[13px] mt-1">Versus traditional wire transfers</p>
+          <h3 className="text-foreground font-semibold font-['Geist_Sans'] text-lg">Execution Friction Removed</h3>
+          <p className="text-muted-foreground text-[13px] mt-1">Compared with standard approval-heavy DEX flows</p>
         </div>
         <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -44,14 +44,14 @@ export default function AnalyticsWidget() {
               </defs>
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: "rgba(15, 23, 42, 0.8)", 
+                  backgroundColor: "var(--bg-card)", 
                   backdropFilter: "blur(12px)",
-                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  borderColor: "var(--card-border)",
                   borderRadius: "8px",
-                  color: "#fff",
+                  color: "var(--text-primary)",
                   fontFamily: "'IBM Plex Mono', monospace"
                 }} 
-                itemStyle={{ color: "#8B5CF6", fontWeight: "bold" }}
+                itemStyle={{ color: "var(--accent-blue)", fontWeight: "bold" }}
               />
               <Area 
                 type="monotone" 
@@ -68,9 +68,9 @@ export default function AnalyticsWidget() {
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center relative z-10">
+      <div className="mt-4 pt-4 border-t border-[var(--card-border)] flex justify-between items-center relative z-10">
         <div className="text-xs text-muted-foreground font-['Geist_Sans']">
-          Based on 8% Western Union avg.
+          Based on avoided popups, approvals, and gas-token setup.
         </div>
         <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider">
           View Report →

@@ -108,16 +108,16 @@ export default function SendForm({ oracleRate = 1455, onSendSuccess, onNewTransa
         }}
       >
         <div style={{ marginBottom: "20px" }}>
-          <h2 style={{ fontWeight: 700, fontSize: "17px", marginBottom: "4px" }}>Send USDC</h2>
+          <h2 style={{ fontWeight: 700, fontSize: "17px", marginBottom: "4px" }}>1-Click Action Demo</h2>
           <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            Cross-border transfer · Injective inEVM
+            Session-protected execution · Injective inEVM
           </div>
         </div>
 
         {/* Recipient */}
         <div style={{ marginBottom: "16px" }}>
           <label style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, display: "block", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Recipient Address
+            Target Address
           </label>
           <input
             className="input-field"
@@ -168,7 +168,7 @@ export default function SendForm({ oracleRate = 1455, onSendSuccess, onNewTransa
             alignItems: "center",
           }}
         >
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Recipient receives</span>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Quoted output</span>
           <span className="mono" style={{ fontSize: "15px", fontWeight: 700, color: amount ? "var(--accent-green)" : "var(--text-muted)" }}>
             ≈ {fiatValue} NGN
           </span>
@@ -185,8 +185,8 @@ export default function SendForm({ oracleRate = 1455, onSendSuccess, onNewTransa
             padding: "0 2px",
           }}
         >
-          <span>Network fee (Injective inEVM)</span>
-          <span className="mono" style={{ color: "var(--accent-green)", fontWeight: 700 }}>$0.00</span>
+          <span>Gas fee via ERC-4337 paymaster</span>
+          <span className="mono" style={{ color: "var(--accent-green)", fontWeight: 700 }}>Sponsored</span>
         </div>
 
         {/* Oracle rate label */}
@@ -219,19 +219,19 @@ export default function SendForm({ oracleRate = 1455, onSendSuccess, onNewTransa
               ? "linear-gradient(135deg, var(--accent-green), #059669)"
               : undefined,
           }}
-          aria-label="Send USDC"
+          aria-label="Execute demo trade"
         >
-          {status === "pending"   && <><span className="spinner" /> Confirming on Injective...</>}
-          {status === "confirmed" && <>✓ Confirmed — {txHash.slice(0, 12)}...</>}
+          {status === "pending"   && <><span className="spinner" /> Executing on Injective...</>}
+          {status === "confirmed" && <>✓ Trade Sent — {txHash.slice(0, 12)}...</>}
           {status === "error"     && "Failed — Try Again"}
-          {status === "idle"      && "Send USDC →"}
+          {status === "idle"      && "Execute Demo Trade →"}
         </button>
 
         {/* Success tx hash */}
         {status === "confirmed" && (
           <div style={{ marginTop: "12px", fontSize: "11px", color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", textAlign: "center" }}>
             <span style={{ color: "var(--accent-green)" }}>✓</span>{" "}
-            Settlement: <strong style={{ color: "var(--text-primary)" }}>&lt; 1s</strong> ·{" "}
+            Execution: <strong style={{ color: "var(--text-primary)" }}>&lt; 1s</strong> ·{" "}
             <a href={`https://inevm.explorer.injective.network/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-blue)", textDecoration: "none" }}>
               View on Explorer ↗
             </a>

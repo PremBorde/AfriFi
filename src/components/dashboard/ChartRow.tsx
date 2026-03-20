@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Area, AreaChart,
 } from "recharts";
 
@@ -24,20 +24,32 @@ const CHART_DATA = {
 type TabKey = keyof typeof CHART_DATA;
 
 const PIE_DATA = [
-  { name: "NGN", value: 60, color: "#0EA5E9" },
+  { name: "NGN", value: 60, color: "var(--accent-blue)" },
   { name: "KES", value: 25, color: "#10B981" },
   { name: "GHS", value: 10, color: "#F59E0B" },
-  { name: "UGX", value: 5, color: "#6366F1" },
+  { name: "UGX", value: 5, color: "var(--accent-cyan)" },
 ];
 
 const BAR_DATA = [
-  { label: "AfriFi", fee: 0.00, color: "#10B981" },
-  { label: "Western Union", fee: 8.0, color: "#EF4444" },
-  { label: "MoneyGram", fee: 5.5, color: "#F59E0B" },
-  { label: "Banks", fee: 12.0, color: "#94A3B8" },
+  { label: "AfriFi", fee: 1.0, color: "#10B981" },
+  { label: "Standard DEX", fee: 4.0, color: "#F43F5E" },
+  { label: "Mobile wallet flow", fee: 5.0, color: "#F59E0B" },
+  { label: "Gas token blocked", fee: 2.0, color: "#94A3B8" },
 ];
 
-function CustomTooltip({ active, payload, label }: any) {
+type TooltipPayload = {
+  value: number;
+};
+
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: TooltipPayload[];
+  label?: string;
+}) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
@@ -67,20 +79,16 @@ export default function ChartRow() {
 
   return (
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "2fr 1fr 1fr",
-        gap: "16px",
-        marginTop: "16px",
-      }}
+      className="grid gap-4 xl:grid-cols-[2fr_1fr_1fr]"
+      style={{ marginTop: "16px" }}
     >
       {/* CHART 1: Volume Line Chart (with tabs) */}
       <div className="card anim-chart-1" style={{ padding: "22px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: "15px" }}>Remittance Volume</div>
+            <div style={{ fontWeight: 700, fontSize: "15px" }}>Trading Volume</div>
             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
-              Total USDC transferred
+              Total notional simulated through the terminal
             </div>
           </div>
           {/* Fix 2: Tab controls */}
@@ -100,22 +108,22 @@ export default function ChartRow() {
           <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="volumeGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#0EA5E9" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}   />
+                <stop offset="5%"  stopColor="var(--accent-blue)" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0}   />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(51,65,85,0.5)" />
-            <XAxis dataKey="label" tick={{ fill: "#64748B", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "#64748B", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+            <XAxis dataKey="label" tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
               dataKey="volume"
-              stroke="#0EA5E9"
+              stroke="var(--accent-blue)"
               strokeWidth={2.5}
               fill="url(#volumeGrad)"
               dot={false}
-              activeDot={{ r: 5, fill: "#0EA5E9", stroke: "var(--bg-deep)", strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: "var(--accent-blue)", stroke: "var(--bg-deep)", strokeWidth: 2 }}
               isAnimationActive={true}
               animationDuration={600}
             />
@@ -123,10 +131,10 @@ export default function ChartRow() {
         </ResponsiveContainer>
       </div>
 
-      {/* CHART 2: Fiat Distribution Pie (manual SVG) */}
+      {/* CHART 2: Execution Mix Pie (manual SVG) */}
       <div className="card anim-chart-2" style={{ padding: "22px" }}>
-        <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>Fiat Split</div>
-        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "20px" }}>By recipient currency</div>
+        <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>Execution Mix</div>
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "20px" }}>Representative stable-denominated flow</div>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
           <PieChart data={PIE_DATA} />
         </div>
@@ -143,10 +151,10 @@ export default function ChartRow() {
         </div>
       </div>
 
-      {/* CHART 3: Fees vs Traditional (bar) */}
+      {/* CHART 3: Friction vs Traditional (bar) */}
       <div className="card anim-chart-3" style={{ padding: "22px" }}>
-        <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>Fee Comparison</div>
-        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "20px" }}>AfriFi vs traditional</div>
+        <div style={{ fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>Friction Comparison</div>
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "20px" }}>Prompts or blockers before execution</div>
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           {BAR_DATA.map((d) => (
             <div key={d.label}>
@@ -155,18 +163,18 @@ export default function ChartRow() {
                   {d.label}
                 </span>
                 <span className="mono" style={{ fontSize: "12px", color: d.color, fontWeight: 600 }}>
-                  {d.fee === 0 ? "$0.00" : `${d.fee}%`}
+                  {d.fee.toFixed(0)} {d.fee === 1 ? "step" : "steps"}
                 </span>
               </div>
-              <div style={{ background: "var(--bg-deep)", borderRadius: "4px", height: "6px", overflow: "hidden" }}>
+              <div style={{ background: "var(--surface-strong)", borderRadius: "999px", height: "8px", overflow: "hidden" }}>
                 <div
                   style={{
-                    width: `${d.fee === 0 ? 2 : (d.fee / 12) * 100}%`,
+                    width: `${(d.fee / 5) * 100}%`,
                     height: "100%",
                     background: d.color,
-                    borderRadius: "4px",
+                    borderRadius: "999px",
                     transition: "width 1s ease-out",
-                    minWidth: d.fee === 0 ? "3px" : 0,
+                    minWidth: "3px",
                   }}
                 />
               </div>
@@ -177,24 +185,24 @@ export default function ChartRow() {
           style={{
             marginTop: "16px",
             padding: "10px",
-            background: "rgba(16,185,129,0.08)",
+            background: "var(--glow-green)",
             borderRadius: "8px",
             textAlign: "center",
             fontSize: "12px",
             color: "var(--accent-green)",
             fontFamily: "'IBM Plex Mono', monospace",
             fontWeight: 600,
-            border: "1px solid rgba(16,185,129,0.2)",
+            border: "1px solid var(--glow-green)",
           }}
         >
-          You save up to 12% per transfer
+          Cut the first trade from four prompts to one click
         </div>
       </div>
     </div>
   );
 }
 
-// Manual SVG pie chart for the fiat split
+// Manual SVG pie chart for the execution mix
 function PieChart({ data }: { data: typeof PIE_DATA }) {
   const size = 110;
   const r = 42;

@@ -70,47 +70,64 @@ export default function MetricCard({
     <div
       className={`card anim-metric-${animIndex}`}
       style={{
-        padding: "12px 16px",
+        padding: "18px",
         display: "flex",
         flexDirection: "column",
-        gap: "6px",
+        gap: "14px",
         flex: 1,
         minWidth: "160px",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span style={{ fontSize: "16px" }}>{icon}</span>
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "14px",
+            display: "grid",
+            placeItems: "center",
+            fontSize: "18px",
+            background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-blue) 14%, white), color-mix(in srgb, var(--accent-cyan) 12%, white))",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7)",
+          }}
+        >
+          {icon}
+        </div>
         {sub && (
           <span
             style={{
-              fontSize: "9px",
+              fontSize: "10px",
               color: "var(--accent-green)",
               fontFamily: "'IBM Plex Mono', monospace",
               fontWeight: 600,
-              background: "rgba(16,185,129,0.1)",
-              padding: "2px 6px",
-              borderRadius: "4px",
+              background: "color-mix(in srgb, var(--accent-green) 10%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--accent-green) 25%, transparent)",
+              padding: "4px 8px",
+              borderRadius: "999px",
             }}
           >
             {sub}
           </span>
         )}
       </div>
-      <div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          {label}
+        </div>
         <div
           className="mono"
           style={{
-            fontSize: "22px",
-            fontWeight: 700,
+            fontSize: "26px",
+            fontWeight: 800,
             color: "var(--text-primary)",
             lineHeight: 1.1,
-            letterSpacing: "-0.5px",
+            letterSpacing: "-0.8px",
           }}
         >
           {displayValue}
         </div>
-        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", fontWeight: 500 }}>
-          {label}
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>
+          Live dashboard benchmark
         </div>
       </div>
     </div>

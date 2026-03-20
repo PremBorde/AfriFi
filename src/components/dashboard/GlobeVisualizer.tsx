@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Globe from "react-globe.gl";
+import { useTheme } from "../layout/ThemeContext";
 
 export interface Arc {
   id: string;
@@ -61,9 +62,9 @@ const INITIAL_ARCS: Arc[] = [
   { id: "a1",  from: CITIES[0],  to: CITIES[11], amount: "$5,000", status: "COMPLETED", color: "#0EA5E9" },
   { id: "a2",  from: CITIES[2],  to: CITIES[12], amount: "$1,400", status: "COMPLETED", color: "#0EA5E9" },
   { id: "a3",  from: CITIES[9],  to: CITIES[12], amount: "$2,100", status: "PENDING",   color: "#F59E0B" },
-  { id: "a4",  from: CITIES[4],  to: CITIES[13], amount: "$3,800", status: "COMPLETED", color: "#06B6D4" },
+  { id: "a4",  from: CITIES[4],  to: CITIES[13], amount: "$3,800", status: "COMPLETED", color: "#10B981" },
   // ── Africa → Americas ──
-  { id: "a5",  from: CITIES[0],  to: CITIES[15], amount: "$2,500", status: "PENDING",   color: "#06B6D4" },
+  { id: "a5",  from: CITIES[0],  to: CITIES[15], amount: "$2,500", status: "PENDING",   color: "#10B981" },
   { id: "a6",  from: CITIES[3],  to: CITIES[16], amount: "$4,300", status: "COMPLETED", color: "#10B981" },
   { id: "a7",  from: CITIES[1],  to: CITIES[17], amount: "$1,900", status: "COMPLETED", color: "#0EA5E9" },
   { id: "a8",  from: CITIES[8],  to: CITIES[18], amount: "$800",   status: "PENDING",   color: "#F59E0B" },
@@ -73,8 +74,8 @@ const INITIAL_ARCS: Arc[] = [
   { id: "a11", from: CITIES[4],  to: CITIES[19], amount: "$3,600", status: "PENDING",   color: "#F59E0B" },
   { id: "a12", from: CITIES[5],  to: CITIES[20], amount: "$1,800", status: "COMPLETED", color: "#8B5CF6" },
   // ── Africa → Middle East ──
-  { id: "a13", from: CITIES[3],  to: CITIES[21], amount: "$6,100", status: "COMPLETED", color: "#06B6D4" },
-  { id: "a14", from: CITIES[1],  to: CITIES[21], amount: "$5,500", status: "COMPLETED", color: "#06B6D4" },
+  { id: "a13", from: CITIES[3],  to: CITIES[21], amount: "$6,100", status: "COMPLETED", color: "#10B981" },
+  { id: "a14", from: CITIES[1],  to: CITIES[21], amount: "$5,500", status: "COMPLETED", color: "#10B981" },
   { id: "a15", from: CITIES[6],  to: CITIES[22], amount: "$2,200", status: "COMPLETED", color: "#0EA5E9" },
   // ── Africa → Southeast Asia ──
   { id: "a16", from: CITIES[1],  to: CITIES[23], amount: "$1,200", status: "COMPLETED", color: "#10B981" },
@@ -85,7 +86,7 @@ const INITIAL_ARCS: Arc[] = [
   { id: "a20", from: CITIES[0],  to: CITIES[27], amount: "$7,500", status: "COMPLETED", color: "#8B5CF6" },
   { id: "a21", from: CITIES[4],  to: CITIES[28], amount: "$4,800", status: "COMPLETED", color: "#0EA5E9" },
   { id: "a22", from: CITIES[1],  to: CITIES[29], amount: "$3,200", status: "PENDING",   color: "#F59E0B" },
-  { id: "a23", from: CITIES[3],  to: CITIES[30], amount: "$5,100", status: "COMPLETED", color: "#06B6D4" },
+  { id: "a23", from: CITIES[3],  to: CITIES[30], amount: "$5,100", status: "COMPLETED", color: "#10B981" },
   // ── Africa → Oceania ──
   { id: "a24", from: CITIES[3],  to: CITIES[31], amount: "$2,400", status: "COMPLETED", color: "#10B981" },
   { id: "a25", from: CITIES[1],  to: CITIES[31], amount: "$1,600", status: "PENDING",   color: "#F59E0B" },
@@ -97,7 +98,7 @@ const INITIAL_ARCS: Arc[] = [
   { id: "a30", from: CITIES[7],  to: CITIES[5],  amount: "$700",   status: "COMPLETED", color: "#10B981" },
   // ── Cross-regional (Global ↔ Global via Injective) ──
   { id: "a31", from: CITIES[27], to: CITIES[15], amount: "$12,000", status: "COMPLETED", color: "#8B5CF6" },
-  { id: "a32", from: CITIES[28], to: CITIES[24], amount: "$8,400",  status: "COMPLETED", color: "#06B6D4" },
+  { id: "a32", from: CITIES[28], to: CITIES[24], amount: "$8,400",  status: "COMPLETED", color: "#10B981" },
   { id: "a33", from: CITIES[19], to: CITIES[21], amount: "$6,200",  status: "COMPLETED", color: "#8B5CF6" },
   { id: "a34", from: CITIES[31], to: CITIES[27], amount: "$9,100",  status: "COMPLETED", color: "#0EA5E9" },
   { id: "a35", from: CITIES[11], to: CITIES[19], amount: "$4,700",  status: "PENDING",   color: "#F59E0B" },
@@ -116,32 +117,34 @@ const arcEndLng   = (d: any) => d.to.lng;
 const arcColor    = (d: any) => [d.color, d.color];
 const ringColor   = (d: any) => d.color;
 const ringMaxR    = (d: any) => d.maxR;
-const ringSpeed   = () => 1;
-const ringPeriod  = () => 2000;
+const ringSpeed   = () => 0.8;
+const ringPeriod  = () => 2500;
 const labelLat    = (d: any) => d.lat;
 const labelLng    = (d: any) => d.lng;
 const labelText   = (d: any) => d.city;
-const labelColor  = (d: any) => d.isAfrica ? "#10B981" : "#0EA5E9";
 
 export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props) {
+  const { theme } = useTheme();
   const globeRef = useRef<any>(null);
   const [arcsData, setArcsData] = useState<Arc[]>(INITIAL_ARCS);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const prevFlash = useRef(0);
 
-  // Throttled resize (fires at most once per 200ms)
+  // Throttled resize (fires at most once per 250ms)
   useEffect(() => {
     if (!containerRef.current) return;
     let timeout: ReturnType<typeof setTimeout>;
     const updateSize = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        setDimensions({
-          width: containerRef.current?.clientWidth || 300,
-          height: containerRef.current?.clientHeight || 300,
-        });
-      }, 200);
+        if (containerRef.current) {
+          setDimensions({
+            width: containerRef.current.clientWidth || 300,
+            height: containerRef.current.clientHeight || 300,
+          });
+        }
+      }, 250);
     };
     updateSize();
     window.addEventListener("resize", updateSize);
@@ -154,20 +157,21 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
     const controls = globeRef.current.controls();
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.4;
-    controls.enableZoom = false;      // prevent accidental zoom stutter
-    controls.enablePan = false;       // keep focus on Africa
+    controls.enableZoom = false;      
+    controls.enablePan = false;       
     globeRef.current.pointOfView({ lat: 5, lng: 25, altitude: 2.2 });
 
-    // Reduce Three.js renderer pixel ratio for perf
+    // Perf: Limit pixel ratio on high-DPI screens to reduce GPU load
     const renderer = globeRef.current.renderer();
     if (renderer) renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   }, []);
 
   // Flash: random Africa → random Global arc
+  // FIX: slice(-48) instead of slice(-12) to prevent initial 35-arc drop "pop"
   useEffect(() => {
     if (flashTrigger > 0 && flashTrigger !== prevFlash.current) {
       prevFlash.current = flashTrigger;
-      const colors = ["#10B981", "#0EA5E9", "#8B5CF6", "#06B6D4", "#F59E0B"];
+      const colors = ["#10B981", "#0EA5E9", "#8B5CF6", "#F59E0B"];
       const newArc: Arc = {
         id: `arc-${Date.now()}`,
         from: CITIES[Math.floor(Math.random() * AFRICA_COUNT)],
@@ -176,20 +180,26 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
         status: "PENDING",
         color: colors[Math.floor(Math.random() * colors.length)]
       };
-      setArcsData(prev => [...prev.slice(-12), newArc]);
+      // Keep at least 48 arcs to ensure the initial 35 are preserved
+      setArcsData(prev => [...prev, newArc].slice(-48));
     }
   }, [flashTrigger]);
 
-  // Rings — only Africa hubs to reduce GPU load (11 → 11 rings kept, but smaller/slower)
+  // Rings — reduced maxR and increased period for performance
   const ringsData = useMemo(() => {
     return CITIES.filter(c => c.isAfrica).map(c => ({
       lat: c.lat,
       lng: c.lng,
-      maxR: 2,
+      maxR: 1.5,
     }));
   }, []);
 
   const handleArcClick = useCallback((arc: any) => onArcClick?.(arc as Arc), [onArcClick]);
+  const labelColor = useCallback(
+    (d: any) => (d.isAfrica ? "#10B981" : theme === "light" ? "#2563EB" : "#0EA5E9"),
+    [theme]
+  );
+  const atmosphereColor = theme === "light" ? "#60A5FA" : "#6366F1";
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
@@ -200,9 +210,9 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
           height={dimensions.height}
 
           /* Visuals — removed bumpImageUrl & backgroundImageUrl for perf */
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+          globeImageUrl={theme === "light" ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg" : "//unpkg.com/three-globe/example/img/earth-night.jpg"}
           backgroundColor="rgba(0,0,0,0)"
-          atmosphereColor="#0EA5E9"
+          atmosphereColor={atmosphereColor}
           atmosphereAltitude={0.15}
 
           /* Arcs */
@@ -245,7 +255,7 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
           left: "50%",
           transform: "translateX(-50%)",
           fontSize: "10px",
-          color: "rgba(255,255,255,0.4)",
+          color: "var(--text-muted)",
           fontFamily: "'IBM Plex Mono', monospace",
           letterSpacing: "0.1em",
           textTransform: "uppercase",

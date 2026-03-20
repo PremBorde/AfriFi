@@ -22,30 +22,34 @@ export default function PortfolioSummary({ walletAddress }: Props) {
   return (
     <div>
       <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>
-        Portfolio Summary
+        Session Summary
       </div>
 
       {/* Balance */}
       <div
         id="wallet-balance"
         style={{
-          marginBottom: "16px",
+          marginBottom: "18px",
+          padding: "16px",
+          borderRadius: "16px",
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-blue) 8%, var(--surface-strong)), color-mix(in srgb, var(--accent-cyan) 6%, var(--surface-strong)))",
+          border: "1px solid var(--card-border)",
           transition: "opacity 0.4s",
           opacity: balanceVisible ? 1 : 0.4,
         }}
       >
-        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "4px" }}>Wallet Balance</div>
+        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "4px" }}>Trading Balance</div>
         <div className="mono" style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>
           {balanceVisible ? "$13,272.38" : "•••••••"}
         </div>
         <div style={{ fontSize: "11px", color: "var(--accent-green)", marginTop: "2px", fontFamily: "'IBM Plex Mono', monospace" }}>
-          USDC · Injective inEVM
+          USDC vault · Injective inEVM
         </div>
       </div>
 
       {/* Mini sparkline */}
       <div style={{ marginBottom: "14px" }}>
-        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "6px" }}>Recent Activity</div>
+        <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "6px" }}>Session Activity</div>
         <ResponsiveContainer width="100%" height={60}>
           <LineChart data={SPARKLINE}>
             <Line
@@ -63,12 +67,12 @@ export default function PortfolioSummary({ walletAddress }: Props) {
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
         {[
-          { label: "Total Sent",      value: "$42,150" },
-          { label: "Transfers",        value: "38" },
-          { label: "Avg. Per Tx",      value: "$1,109" },
-          { label: "Fee Saved",        value: "$3,372" },
+          { label: "Total Volume", value: "$42,150" },
+          { label: "Orders", value: "38" },
+          { label: "Avg. Trade", value: "$1,109" },
+          { label: "Prompts Removed", value: "76" },
         ].map(({ label, value }) => (
-          <div key={label} style={{ background: "var(--bg-deep)", borderRadius: "8px", padding: "10px 12px" }}>
+          <div key={label} style={{ background: "var(--surface-strong)", borderRadius: "14px", padding: "12px", border: "1px solid var(--card-border)" }}>
             <div style={{ fontSize: "10px", color: "var(--text-muted)", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
             <div className="mono" style={{ fontSize: "15px", fontWeight: 700 }}>{value}</div>
           </div>

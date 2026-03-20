@@ -48,9 +48,9 @@ export default function LiveFeedTable({ newTx, onRowClick }: Props) {
     <div className="card anim-table" id="history" style={{ padding: "20px 0", overflow: "hidden" }}>
       <div style={{ padding: "0 20px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <span style={{ fontWeight: 700, fontSize: "15px" }}>Live Transaction Feed</span>
+          <span style={{ fontWeight: 700, fontSize: "15px" }}>Live Execution Feed</span>
           <span style={{ marginLeft: "12px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Updates in real-time as <code style={{ color: "var(--accent-blue)", fontSize: "11px" }}>RemittanceSent</code> events fire
+            Updates in real-time as <code style={{ color: "var(--accent-blue)", fontSize: "11px" }}>SessionTradeExecuted</code> events fire
           </span>
         </div>
         <button
@@ -60,19 +60,19 @@ export default function LiveFeedTable({ newTx, onRowClick }: Props) {
             ].join("\n");
             const a = document.createElement("a");
             a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-            a.download = "afrfi-transactions.csv";
+            a.download = "afrifi-executions.csv";
             a.click();
           }}
           style={{
-            background: "var(--bg-deep)",
-            border: "1px solid var(--border-light)",
-            borderRadius: "6px",
-            padding: "6px 12px",
+            background: "var(--surface-strong)",
+            border: "1px solid var(--card-border)",
+            borderRadius: "999px",
+            padding: "8px 14px",
             fontSize: "11px",
             color: "var(--text-muted)",
             cursor: "pointer",
             fontFamily: "'IBM Plex Mono', monospace",
-            transition: "color 0.2s",
+            transition: "color 0.2s, border-color 0.2s, transform 0.2s",
           }}
         >
           ↓ Export CSV
@@ -80,7 +80,7 @@ export default function LiveFeedTable({ newTx, onRowClick }: Props) {
       </div>
 
       <div style={{ overflowX: "auto" }}>
-        <table className="data-table" role="grid" aria-label="Transaction history">
+        <table className="data-table" role="grid" aria-label="Execution history">
           <thead>
             <tr>
               <th scope="col">Sender</th>

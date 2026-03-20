@@ -1,26 +1,24 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import MetricCard from "@/components/dashboard/MetricCard";
 import dynamic from "next/dynamic";
 const GlobeVisualizer = dynamic(() => import("@/components/dashboard/GlobeVisualizer"), { ssr: false });
-import type { Arc } from "@/components/dashboard/GlobeVisualizer";
 import LiveTransferList from "@/components/dashboard/LiveTransferList";
 import PortfolioSummary from "@/components/dashboard/PortfolioSummary";
-import SendForm from "@/components/dashboard/SendForm";
 import LiveFeedTable, { type Tx } from "@/components/dashboard/LiveFeedTable";
 import ChartRow from "@/components/dashboard/ChartRow";
 import TxModal from "@/components/dashboard/TxModal";
 import Toast from "@/components/ui/Toast";
-import AnalyticsWidget from "@/components/dashboard/AnalyticsWidget";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
-const fadeInUp: any = {
+
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
 };
 
-const staggerContainer: any = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -30,8 +28,6 @@ const staggerContainer: any = {
 
 // ---- Live simulation data ----
 const NAMES = ["0xAf3...f1e", "0x7f1...3aD", "0xB3e...9fA", "0x2aA...7cB", "0xDd4...b2F"];
-const CITIES = ["Lagos", "Nairobi", "Accra"];
-const FLAGS  = { Lagos:"🇳🇬", Nairobi:"🇰🇪", Accra:"🇬🇭" };
 let txCounter = 100;
 
 function makeTx(): Tx {
@@ -63,6 +59,7 @@ export default function DashboardPage() {
   const [selectedTx, setSelectedTx]         = useState<Tx | null>(null);
   const [newTx, setNewTx]                   = useState<Tx | undefined>(undefined);
 
+
   // Metrics state — updated by live simulation
   const [totalSent,       setTotalSent]       = useState(1714330);
   const [settlements,     setSettlements]     = useState(234);
@@ -72,7 +69,7 @@ export default function DashboardPage() {
   // Fix 5: Wallet connect handler
   const handleWalletConnect = useCallback((address: string) => {
     setWalletAddress(address);
-    setToastMsg("✓ Wallet Connected — Injective inEVM");
+    setToastMsg("✓ Session Key Active — Injective inEVM");
     setShowToast(true);
 
     // Pulse network badge 3x faster for 1 second
@@ -98,83 +95,8 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle send form success (also triggers globe flash + new row)
-  const handleSendSuccess = useCallback((txHash: string) => {
-    const tx: Tx = {
-      id:        String(++txCounter),
-      sender:    walletAddress || "0xAf3...f1e",
-      recipient: "0x9c2...e41",
-      amount:    100,
-      fiatValue: 100 * oracleRate,
-      fiatCur:   "NGN",
-      status:    "COMPLETED",
-      timestamp: new Date().toLocaleString(),
-      txHash,
-    };
-    setNewTx(tx);
-    setGlobeFlash((v) => v + 1);
-    setTotalSent((v) => v + 100);
-    setSettlements((v) => v + 1);
-  }, [walletAddress, oracleRate]);
-
-  const handleNewTxFromForm = useCallback(() => {
-    setGlobeFlash((v) => v + 1);
-  }, []);
-
-  // --- NEW: Video Background Loop ---
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    let rafId: number;
-    const fadeDuration = 0.5;
-
-    const tick = () => {
-      if (!video.duration || isNaN(video.duration)) {
-        rafId = requestAnimationFrame(tick);
-        return;
-      }
-      const { currentTime, duration } = video;
-      if (currentTime < fadeDuration) {
-        video.style.opacity = (currentTime / fadeDuration).toString();
-      } else if (duration - currentTime < fadeDuration) {
-        video.style.opacity = Math.max(0, (duration - currentTime) / fadeDuration).toString();
-      } else {
-        video.style.opacity = "1";
-      }
-      rafId = requestAnimationFrame(tick);
-    };
-
-    const onEnded = () => {
-      video.style.opacity = "0";
-      setTimeout(() => { video.currentTime = 0; video.play().catch(() => {}); }, 100);
-    };
-
-    video.addEventListener("ended", onEnded);
-    rafId = requestAnimationFrame(tick);
-    video.play().catch(() => {});
-    return () => { cancelAnimationFrame(rafId); video.removeEventListener("ended", onEnded); };
-  }, []);
-
   return (
-    <>
-      {/* --- Animated Video Background for Dashboard --- */}
-      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-background">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover mix-blend-screen"
-          style={{ opacity: 0, filter: "hue-rotate(200deg) saturate(1.5)" }}
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-background/90" />
-      </div>
-
-      {/* Fix 5: Toast */}
+    <>      {/* Fix 5: Toast */}
       <Toast message={toastMsg} show={showToast} onDone={() => setShowToast(false)} />
 
       {/* TX Modal */}
@@ -192,50 +114,39 @@ export default function DashboardPage() {
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        style={{
-          padding: "20px 24px",
-          maxWidth: "1400px",
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          fontFamily: "'Geist Sans', sans-serif",
-        }}
+        className="mx-auto flex w-full max-w-[1400px] flex-col gap-4 px-4 py-5 md:px-6"
+        style={{ fontFamily: "'Geist Sans', sans-serif" }}
       >
         {/* ── METRIC STRIP ── */}
         <motion.div
           variants={fadeInUp}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "14px",
-          }}
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
         >
           <MetricCard
             icon="💸"
-            label="Total Remittances (USDC)"
+            label="Simulated Trading Volume (USDC)"
             value={totalSent}
             prefix="$"
             animIndex={1}
           />
           <MetricCard
             icon="⚡"
-            label="Avg Settlement Speed"
+            label="Avg Execution Speed"
             value="< 1s"
             sub="inEVM"
             animIndex={2}
           />
           <MetricCard
             icon="💰"
-            label="Total Fees Saved"
+            label="Wallet Friction Removed"
             value={feeSaved}
             prefix="$"
-            sub="vs WU 8%"
+            sub="via AA flow"
             animIndex={3}
           />
           <MetricCard
             icon="📡"
-            label="Oracle Rate (1 USDC)"
+            label="Demo Reference Rate"
             value={`${oracleRate.toLocaleString()} NGN`}
             animIndex={4}
           />
@@ -244,28 +155,23 @@ export default function DashboardPage() {
         {/* ── MIDDLE ROW (Globe + side panels) ── */}
         <motion.div
           variants={fadeInUp}
-          className="anim-middle-row"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "220px 1fr 220px",
-            gap: "14px",
-            minHeight: "300px",
-          }}
+          className="anim-middle-row grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)_300px]"
+          style={{ minHeight: "300px" }}
         >
-          {/* LEFT: Active Transfers + Global Reach */}
+          {/* LEFT: Active Orders + Session Metrics */}
           <div
             className="card"
-            style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "20px", overflow: "hidden" }}
+            style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px", overflow: "hidden" }}
           >
             <LiveTransferList />
             <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
               <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>
-                Global Reach
+                Session Metrics
               </div>
               {[
-                { label: "Countries Connected", value: "54" },
-                { label: "Recipients Reached",  value: settlements.toLocaleString() },
-                { label: "Total Volume",         value: `$${totalSent.toLocaleString()}` },
+                { label: "Session Window", value: "24h" },
+                { label: "One-Click Actions",  value: settlements.toLocaleString() },
+                { label: "Total Volume", value: `$${totalSent.toLocaleString()}` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
                   <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{label}</span>
@@ -278,12 +184,28 @@ export default function DashboardPage() {
           {/* CENTER: Globe */}
           <div
             className="card"
-            style={{ padding: "16px", display: "flex", flexDirection: "column" }}
+            style={{ padding: "18px", display: "flex", flexDirection: "column" }}
           >
-            <div style={{ textAlign: "center", marginBottom: "8px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 700 }}>
-                💡 Injective Remittance Hub
-              </span>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
+              <div>
+                <div style={{ fontSize: "16px", fontWeight: 800 }}>Global Settlement Flow</div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
+                  Africa-to-global execution routed through Injective inEVM
+                </div>
+              </div>
+              <div
+                style={{
+                  padding: "7px 10px",
+                  borderRadius: "999px",
+                  background: "color-mix(in srgb, var(--accent-blue) 8%, transparent)",
+                  border: "1px solid var(--card-border)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: "11px",
+                  color: "var(--accent-blue)",
+                }}
+              >
+                Real-time map
+              </div>
             </div>
             <div style={{ flex: 1, minHeight: "280px" }}>
               <GlobeVisualizer
@@ -310,7 +232,7 @@ export default function DashboardPage() {
           {/* RIGHT: Live Tape + Portfolio */}
           <div
             className="card"
-            style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "20px", overflow: "hidden" }}
+            style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px", overflow: "hidden" }}
           >
             {/* Live Tape */}
             <div>
@@ -320,7 +242,7 @@ export default function DashboardPage() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "160px", overflowY: "auto" }}>
                 {newTx ? (
-                  <div className="new-row" style={{ padding: "8px 10px", background: "var(--bg-deep)", borderRadius: "6px", fontSize: "11px", fontFamily: "'IBM Plex Mono', monospace" }}>
+                  <div className="new-row" style={{ padding: "10px 12px", background: "var(--surface-strong)", borderRadius: "12px", border: "1px solid var(--card-border)", fontSize: "11px", fontFamily: "'IBM Plex Mono', monospace" }}>
                     <span style={{ color: "var(--accent-green)" }}>NEW</span>{" "}
                     {newTx.sender} → {newTx.recipient.slice(0,8)}... · ${newTx.amount.toLocaleString()}
                   </div>
@@ -332,7 +254,7 @@ export default function DashboardPage() {
                   { time: "21:44:19", sender: "0x2aA...7cB", amount: "$3,000" },
                   { time: "21:44:01", sender: "0xDd4...b2F", amount: "$350"   },
                 ].map((row, i) => (
-                  <div key={i} style={{ padding: "8px 10px", background: "var(--bg-deep)", borderRadius: "6px", fontSize: "11px", fontFamily: "'IBM Plex Mono', monospace", display: "flex", justifyContent: "space-between" }}>
+                  <div key={i} style={{ padding: "10px 12px", background: "var(--surface-strong)", borderRadius: "12px", border: "1px solid var(--card-border)", fontSize: "11px", fontFamily: "'IBM Plex Mono', monospace", display: "flex", justifyContent: "space-between" }}>
                     <span style={{ color: "var(--text-muted)" }}>{row.time}</span>
                     <span>{row.sender}</span>
                     <span style={{ color: "var(--accent-green)", fontWeight: 600 }}>{row.amount}</span>
@@ -348,15 +270,6 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* ── SEND FORM + CHARTS ── */}
-        <motion.div variants={fadeInUp} style={{ display: "grid", gridTemplateColumns: "500px 1fr", gap: "16px", alignItems: "stretch" }}>
-          <SendForm
-            oracleRate={oracleRate}
-            onSendSuccess={handleSendSuccess}
-            onNewTransaction={handleNewTxFromForm}
-          />
-          <AnalyticsWidget />
-        </motion.div>
 
         {/* ── CHARTS ROW ── */}
         <motion.div variants={fadeInUp}>

@@ -32,7 +32,7 @@ export default function TxModal({ tx, onClose }: Props) {
           {/* Close Button float */}
           <button 
             onClick={onClose} 
-            className="absolute -top-12 right-0 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            className="absolute -top-12 right-0 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--surface-strong)] text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-soft)]"
           >
             ✕
           </button>
@@ -41,16 +41,16 @@ export default function TxModal({ tx, onClose }: Props) {
           <div className="w-full h-3 bg-card" style={{ maskImage: "radial-gradient(circle at 6px 0, transparent 4px, black 5px)", maskSize: "12px 12px", maskPosition: "bottom" }} />
 
           {/* Receipt Body */}
-          <div className="bg-card px-8 py-6 shadow-2xl flex flex-col items-center">
+          <div className="bg-card px-8 py-6 shadow-2xl flex flex-col items-center border-x border-[var(--card-border)]">
             
-            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 border border-white/10 shadow-[inset_0_2px_10px_rgba(255,255,255,0.05)]">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--card-border)] bg-[var(--surface-strong)] shadow-[inset_0_2px_10px_rgba(255,255,255,0.05)]">
               <QrCode className="w-8 h-8 text-primary/80" />
             </div>
 
             <h2 className="text-xl font-bold font-['Geist_Sans'] text-foreground tracking-tight mb-1">Transaction Receipt</h2>
             <p className="text-xs text-muted-foreground font-mono mb-6">{new Date().toLocaleString()}</p>
 
-            <div className="w-full border-t-2 border-dashed border-white/10 my-4" />
+            <div className="my-4 w-full border-t-2 border-dashed border-[var(--card-border)]" />
 
             <div className="flex flex-col items-center w-full gap-1 mb-6">
               <span className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">Amount Sent</span>
@@ -88,17 +88,17 @@ export default function TxModal({ tx, onClose }: Props) {
                </div>
                <div className="flex justify-between flex-col gap-1 mt-2">
                  <span className="text-muted-foreground">NETWORK HASH</span>
-                 <div className="flex items-center justify-between bg-black/40 p-2 rounded border border-white/5 cursor-pointer group" onClick={() => handleCopy(tx.txHash)}>
+                 <div className="group flex cursor-pointer items-center justify-between rounded border border-[var(--card-border)] bg-[var(--surface-strong)] p-2" onClick={() => handleCopy(tx.txHash)}>
                    <span className="text-foreground/80 truncate pr-4">{tx.txHash}</span>
                    <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary shrink-0" />
                  </div>
                </div>
             </div>
 
-            <div className="w-full border-t-2 border-dashed border-white/10 my-6" />
+            <div className="my-6 w-full border-t-2 border-dashed border-[var(--card-border)]" />
 
             <div className="text-center w-full">
-              <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 w-full py-3 bg-white/5 hover:bg-white/10 text-foreground font-semibold rounded-xl text-sm transition-colors group">
+              <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="group inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--card-border)] bg-[var(--surface-strong)] py-3 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--surface-soft)]">
                 View on Explorer <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </a>
             </div>
