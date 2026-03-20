@@ -1,6 +1,8 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ethers } from "ethers";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import {
     PAYMASTER_ADDRESS,
     SMART_ACCOUNT_FACTORY,
@@ -20,7 +22,7 @@ const PAIRS = ["INJ/USDT", "ETH/USDT"];
 const REQUIRED_CHAIN_ID = 1439;
 
 export default function Setup() {
-    const nav = useNavigate();
+    const router = useRouter();
     const { saveSession, remainingText, session } = useSessionKey();
 
     const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
@@ -110,7 +112,7 @@ export default function Setup() {
             }
 
             if (!VAULT_ADDRESS) {
-                alert("VITE_VAULT_CONTRACT not set in frontend/.env");
+                alert("NEXT_PUBLIC_VAULT_CONTRACT not set in frontend/.env");
                 return;
             }
 
@@ -231,7 +233,7 @@ export default function Setup() {
 
     async function addPaymasterStake() {
         if (!provider || !PAYMASTER_ADDRESS) {
-            alert("Set VITE_PAYMASTER_CONTRACT in frontend env.");
+            alert("Set NEXT_PUBLIC_PAYMASTER_CONTRACT in frontend env.");
             return;
         }
         setFundingBusy(true);
@@ -459,7 +461,7 @@ export default function Setup() {
                     text="Open trading terminal →"
                     loadingText="Opening..."
                     successText="Opened"
-                    onClick={() => nav("/terminal")}
+                    onClick={() => router.push("/terminal")}
                     disabled={step < 4}
                     classes="mt-4 h-11 border-[var(--card-border)] bg-[var(--bg-card)] disabled:opacity-40"
                 />

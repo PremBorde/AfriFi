@@ -54,7 +54,7 @@ export default function TxModal({ tx, onClose }: Props) {
 
             <div className="flex flex-col items-center w-full gap-1 mb-6">
               <span className="text-sm text-muted-foreground uppercase tracking-widest font-semibold">Amount Sent</span>
-              <span className="text-4xl font-black font-mono tracking-tighter text-foreground">${tx.amount.toLocaleString()}</span>
+              <span className="text-4xl font-black font-mono tracking-tighter text-foreground">${tx.amount.toLocaleString("en-US")}</span>
               <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded mt-1 font-mono">0.00 INJ GAS</span>
             </div>
 
@@ -78,7 +78,7 @@ export default function TxModal({ tx, onClose }: Props) {
                </div>
                <div className="flex justify-between">
                  <span className="text-muted-foreground">LOCAL FIAT</span>
-                 <span className="text-foreground">{tx.fiatValue.toLocaleString()} {tx.fiatCur}</span>
+                 <span className="text-foreground">{tx.fiatValue.toLocaleString("en-US")} {tx.fiatCur}</span>
                </div>
                <div className="flex justify-between items-center group cursor-pointer" onClick={() => handleCopy(claimCode)}>
                  <span className="text-muted-foreground">CLAIM CODE</span>

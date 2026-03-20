@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { ENTRYPOINT, SMART_ACCOUNT_FACTORY, VAULT_ADDRESS, factoryAbi, smartAccountAbi, vaultAbi } from "@/lib/contracts";
+import { ENTRYPOINT, SMART_ACCOUNT_FACTORY, VAULT_ADDRESS, factoryAbi, smartAccountAbi, vaultAbi } from "../lib/contracts";
 import { buildUserOp, hashUserOp } from "../lib/userOp";
 import { pollOrderStatus, submitUserOp } from "../lib/injective";
 
@@ -54,7 +54,7 @@ export function useUserOp() {
             });
 
             const wallet = new ethers.Wallet(params.sessionPrivateKey);
-            const digest = hashUserOp(userOp, ENTRYPOINT, Number(import.meta.env.VITE_CHAIN_ID || 2424));
+            const digest = hashUserOp(userOp, ENTRYPOINT, Number(process.env.NEXT_PUBLIC_CHAIN_ID || 2424));
             const signature = await wallet.signMessage(ethers.getBytes(digest));
             userOp.signature = signature;
 

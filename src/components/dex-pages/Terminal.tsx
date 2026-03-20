@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { ethers } from "ethers";
 import { useSessionKey } from "../hooks/useSessionKey";

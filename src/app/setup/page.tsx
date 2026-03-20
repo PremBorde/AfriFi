@@ -1,4 +1,4 @@
-import DexSetup from "@/components/dex/Setup";
+import DexSetup from "@/components/dex-pages/Setup";
 import Header from "@/components/layout/Header";
 
 export const metadata = {

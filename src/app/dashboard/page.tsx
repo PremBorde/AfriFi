@@ -147,7 +147,7 @@ export default function DashboardPage() {
           <MetricCard
             icon="📡"
             label="Demo Reference Rate"
-            value={`${oracleRate.toLocaleString()} NGN`}
+            value={`${oracleRate.toLocaleString("en-US")} NGN`}
             animIndex={4}
           />
         </motion.div>
@@ -170,8 +170,8 @@ export default function DashboardPage() {
               </div>
               {[
                 { label: "Session Window", value: "24h" },
-                { label: "One-Click Actions",  value: settlements.toLocaleString() },
-                { label: "Total Volume", value: `$${totalSent.toLocaleString()}` },
+                { label: "One-Click Actions",  value: settlements.toLocaleString("en-US") },
+                { label: "Total Volume", value: `$${totalSent.toLocaleString("en-US")}` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
                   <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{label}</span>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                 {newTx ? (
                   <div className="new-row" style={{ padding: "10px 12px", background: "var(--surface-strong)", borderRadius: "12px", border: "1px solid var(--card-border)", fontSize: "11px", fontFamily: "'IBM Plex Mono', monospace" }}>
                     <span style={{ color: "var(--accent-green)" }}>NEW</span>{" "}
-                    {newTx.sender} → {newTx.recipient.slice(0,8)}... · ${newTx.amount.toLocaleString()}
+                    {newTx.sender} → {newTx.recipient.slice(0,8)}... · ${newTx.amount.toLocaleString("en-US")}
                   </div>
                 ) : null}
                 {[

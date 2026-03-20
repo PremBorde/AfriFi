@@ -158,7 +158,7 @@ function AnimCounter({ target, prefix = "", suffix = "", duration = 2000 }: { ta
     return () => obs.disconnect();
   }, [target, duration]);
 
-  return <span ref={ref}>{prefix}{value.toLocaleString()}{suffix}</span>;
+  return <span ref={ref}>{prefix}{value.toLocaleString("en-US")}{suffix}</span>;
 }
 
 /* ──────────────────────────────────────────

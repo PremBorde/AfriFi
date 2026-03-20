@@ -9,15 +9,15 @@ import {
 const CHART_DATA = {
   "7D": {
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    data:   [18400, 24200, 19800, 31500, 27300, 38900, 42100],
+    data: [18400, 24200, 19800, 31500, 27300, 38900, 42100],
   },
   "30D": {
     labels: ["Wk 1", "Wk 2", "Wk 3", "Wk 4", "Wk 5", "Wk 6", "Wk 7", "Wk 8"],
-    data:   [92000, 118000, 134000, 98000, 145000, 167000, 189000, 210000],
+    data: [92000, 118000, 134000, 98000, 145000, 167000, 189000, 210000],
   },
   All: {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    data:   [45000, 89000, 134000, 198000, 267000, 312000],
+    data: [45000, 89000, 134000, 198000, 267000, 312000],
   },
 };
 
@@ -62,7 +62,7 @@ function CustomTooltip({
     }}>
       <div style={{ color: "var(--text-muted)", marginBottom: "4px" }}>{label}</div>
       <div style={{ color: "var(--accent-blue)", fontWeight: 600 }}>
-        ${payload[0].value.toLocaleString()}
+        ${payload[0].value.toLocaleString("en-US")}
       </div>
     </div>
   );
@@ -108,13 +108,13 @@ export default function ChartRow() {
           <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="volumeGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="var(--accent-blue)" stopOpacity={0.28} />
-                <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0}   />
+                <stop offset="5%" stopColor="var(--accent-blue)" stopOpacity={0.28} />
+                <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
             <XAxis dataKey="label" tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} />
+            <YAxis tick={{ fill: "var(--text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
@@ -214,12 +214,17 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
     const startAngle = (cumulative / 100) * 2 * Math.PI - Math.PI / 2;
     cumulative += d.value;
     const endAngle = (cumulative / 100) * 2 * Math.PI - Math.PI / 2;
-    const x1 = cx + r * Math.cos(startAngle);
-    const y1 = cy + r * Math.sin(startAngle);
-    const x2 = cx + r * Math.cos(endAngle);
-    const y2 = cy + r * Math.sin(endAngle);
+
+    // FIX: Round coordinates to 3 decimal places to prevent hydration mismatch
+    const x1 = (cx + r * Math.cos(startAngle)).toFixed(3);
+    const y1 = (cy + r * Math.sin(startAngle)).toFixed(3);
+    const x2 = (cx + r * Math.cos(endAngle)).toFixed(3);
+    const y2 = (cy + r * Math.sin(endAngle)).toFixed(3);
+
     const largeArc = d.value > 50 ? 1 : 0;
+
     return {
+      // The coordinates are now strings, which is perfectly fine for template literals
       path: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`,
       color: d.color,
       name: d.name,
@@ -229,10 +234,25 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
   return (
     <svg width={size} height={size}>
       {slices.map((s, i) => (
-        <path key={i} d={s.path} fill={s.color} opacity={0.85} stroke="var(--bg-card)" strokeWidth={2} />
+        <path
+          key={i}
+          d={s.path}
+          fill={s.color}
+          opacity={0.85}
+          stroke="var(--bg-card)"
+          strokeWidth={2}
+        />
       ))}
       <circle cx={cx} cy={cy} r={r * 0.55} fill="var(--bg-card)" />
-      <text x={cx} y={cy + 4} textAnchor="middle" fontSize="11" fill="var(--text-muted)" fontFamily="IBM Plex Mono, monospace" fontWeight="600">
+      <text
+        x={cx}
+        y={cy + 4}
+        textAnchor="middle"
+        fontSize="11"
+        fill="var(--text-muted)"
+        fontFamily="IBM Plex Mono, monospace"
+        fontWeight="600"
+      >
         NGN 60%
       </text>
     </svg>
