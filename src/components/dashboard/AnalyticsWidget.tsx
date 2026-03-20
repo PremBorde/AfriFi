@@ -23,7 +23,7 @@ export default function AnalyticsWidget() {
       
       <div className="flex justify-between items-start mb-6 relative z-10">
         <div>
-          <h3 className="text-foreground font-semibold font-['Geist_Sans'] text-lg">Execution Friction Removed</h3>
+          <h3 className="text-foreground font-semibold text-lg">Execution Friction Removed</h3>
           <p className="text-muted-foreground text-[13px] mt-1">Compared with standard approval-heavy DEX flows</p>
         </div>
         <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
@@ -69,7 +69,7 @@ export default function AnalyticsWidget() {
       </div>
 
       <div className="mt-4 pt-4 border-t border-[var(--card-border)] flex justify-between items-center relative z-10">
-        <div className="text-xs text-muted-foreground font-['Geist_Sans']">
+        <div className="text-xs text-muted-foreground">
           Based on avoided popups, approvals, and gas-token setup.
         </div>
         <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider">

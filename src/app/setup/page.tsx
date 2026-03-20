@@ -10,7 +10,7 @@ export default function SetupPage() {
   return (
     <>
       <Header />
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px", fontFamily: "'Geist Sans', sans-serif" }}>
+      <main className="mx-auto w-full max-w-[1100px] px-6 py-8">
         <DexSetup />
       </main>
     </>

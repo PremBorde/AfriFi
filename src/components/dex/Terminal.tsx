@@ -1,10 +1,9 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import { ethers } from "ethers";
-import { useSessionKey } from "../hooks/useSessionKey";
-import { usePriceFeed } from "../hooks/usePriceFeed";
-import { useUserOp } from "../hooks/useUserOp";
+import { useSessionKey } from "../../hooks/dex/useSessionKey";
+import { usePriceFeed } from "../../hooks/dex/usePriceFeed";
+import { useUserOp } from "../../hooks/dex/useUserOp";
 import AnimatedGenerateButton from "@/components/ui/animated-generate-button-shadcn-tailwind";
 
 type TradeFeedItem = {

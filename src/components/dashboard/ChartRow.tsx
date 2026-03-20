@@ -210,6 +210,8 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
   const cy = size / 2;
   let cumulative = 0;
 
+  const f = (n: number) => n.toFixed(6);
+
   const slices = data.map((d) => {
     const startAngle = (cumulative / 100) * 2 * Math.PI - Math.PI / 2;
     cumulative += d.value;
@@ -224,8 +226,12 @@ function PieChart({ data }: { data: typeof PIE_DATA }) {
     const largeArc = d.value > 50 ? 1 : 0;
 
     return {
+<<<<<<< HEAD
       // The coordinates are now strings, which is perfectly fine for template literals
       path: `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`,
+=======
+      path: `M ${f(cx)} ${f(cy)} L ${f(x1)} ${f(y1)} A ${f(r)} ${f(r)} 0 ${largeArc} 1 ${f(x2)} ${f(y2)} Z`,
+>>>>>>> 42471d86986b06cf6119755399fede1f08a941ac
       color: d.color,
       name: d.name,
     };

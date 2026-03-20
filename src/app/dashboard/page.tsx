@@ -10,7 +10,7 @@ import LiveFeedTable, { type Tx } from "@/components/dashboard/LiveFeedTable";
 import ChartRow from "@/components/dashboard/ChartRow";
 import TxModal from "@/components/dashboard/TxModal";
 import Toast from "@/components/ui/Toast";
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants, useReducedMotion } from "framer-motion";
 
 
 const fadeInUp: Variants = {
@@ -52,6 +52,7 @@ function makeTx(): Tx {
 }
 
 export default function DashboardPage() {
+  const reduceMotion = useReducedMotion();
   const [walletAddress, setWalletAddress]   = useState<string>("");
   const [showToast, setShowToast]           = useState(false);
   const [toastMsg, setToastMsg]             = useState("");
@@ -112,10 +113,9 @@ export default function DashboardPage() {
 
       <motion.main
         variants={staggerContainer}
-        initial="hidden"
+        initial={reduceMotion ? false : "hidden"}
         animate="visible"
         className="mx-auto flex w-full max-w-[1400px] flex-col gap-4 px-4 py-5 md:px-6"
-        style={{ fontFamily: "'Geist Sans', sans-serif" }}
       >
         {/* ── METRIC STRIP ── */}
         <motion.div
@@ -155,17 +155,13 @@ export default function DashboardPage() {
         {/* ── MIDDLE ROW (Globe + side panels) ── */}
         <motion.div
           variants={fadeInUp}
-          className="anim-middle-row grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)_300px]"
-          style={{ minHeight: "300px" }}
+          className="anim-middle-row grid min-h-[300px] gap-4 xl:grid-cols-[260px_minmax(0,1fr)_300px]"
         >
           {/* LEFT: Active Orders + Session Metrics */}
-          <div
-            className="card"
-            style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px", overflow: "hidden" }}
-          >
+          <div className="card flex flex-col gap-5 overflow-hidden p-5">
             <LiveTransferList />
-            <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
-              <div style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "10px" }}>
+            <div className="border-t border-[var(--border-light)] pt-4">
+              <div className="mb-2.5 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--text-muted)]">
                 Session Metrics
               </div>
               {[
@@ -173,58 +169,33 @@ export default function DashboardPage() {
                 { label: "One-Click Actions",  value: settlements.toLocaleString("en-US") },
                 { label: "Total Volume", value: `$${totalSent.toLocaleString("en-US")}` },
               ].map(({ label, value }) => (
-                <div key={label} style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{label}</span>
-                  <span className="mono" style={{ fontSize: "13px", fontWeight: 700, color: "var(--accent-blue)" }}>{value}</span>
+                <div key={label} className="mb-2.5 flex items-center justify-between">
+                  <span className="text-[11px] text-[var(--text-muted)]">{label}</span>
+                  <span className="mono text-[13px] font-bold text-[var(--accent-blue)]">{value}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* CENTER: Globe */}
-          <div
-            className="card"
-            style={{ padding: "18px", display: "flex", flexDirection: "column" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginBottom: "12px" }}>
+          <div className="card flex flex-col p-[18px]">
+            <div className="mb-3 flex items-center justify-between gap-3">
               <div>
-                <div style={{ fontSize: "16px", fontWeight: 800 }}>Global Settlement Flow</div>
-                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
+                <div className="text-base font-extrabold">Global Settlement Flow</div>
+                <div className="mt-0.5 text-xs text-[var(--text-muted)]">
                   Africa-to-global execution routed through Injective inEVM
                 </div>
               </div>
               <div
-                style={{
-                  padding: "7px 10px",
-                  borderRadius: "999px",
-                  background: "color-mix(in srgb, var(--accent-blue) 8%, transparent)",
-                  border: "1px solid var(--card-border)",
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: "11px",
-                  color: "var(--accent-blue)",
-                }}
+                className="rounded-full border border-[var(--card-border)] px-[10px] py-[7px] font-mono text-[11px] text-[var(--accent-blue)]"
+                style={{ background: "color-mix(in srgb, var(--accent-blue) 8%, transparent)" }}
               >
                 Real-time map
               </div>
             </div>
-            <div style={{ flex: 1, minHeight: "280px" }}>
+            <div className="min-h-[280px] flex-1">
               <GlobeVisualizer
                 flashTrigger={globeFlash}
-                onArcClick={(arc) => {
-                  // Create a pseudo Tx from an arc click
-                  const pseudoTx: Tx = {
-                    id:        arc.id,
-                    sender:    arc.from.city,
-                    recipient: arc.to.city,
-                    amount:    parseInt(arc.amount.replace(/\D/g, "")),
-                    fiatValue: parseInt(arc.amount.replace(/\D/g, "")) * 1455,
-                    fiatCur:   "NGN",
-                    status:    arc.status,
-                    timestamp: new Date().toLocaleString(),
-                    txHash:    `0x${arc.id}deadbeef0000000000000000000000000000000000000000000000000000`,
-                  };
-                  setSelectedTx(pseudoTx);
-                }}
               />
             </div>
           </div>

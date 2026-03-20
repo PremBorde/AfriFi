@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onWalletConnect?: (address: string) => void;
@@ -36,26 +37,18 @@ export default function Header({ onWalletConnect, walletAddress }: HeaderProps) 
 
   return (
     <header
-      className="anim-header"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "18px",
-        padding: "12px 24px",
-        minHeight: "76px",
-        background: "var(--header-bg)",
-        borderBottom: "1px solid var(--header-border)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
-        boxShadow: "0 10px 30px rgba(15, 23, 42, 0.06)",
-      }}
+      className={cn(
+        "anim-header sticky top-0 z-[100]",
+        "flex min-h-[76px] w-full items-center justify-between gap-4",
+        "border-b border-[var(--header-border)] bg-[var(--header-bg)]",
+        "px-4 py-3 md:px-6",
+        "backdrop-blur-xl",
+        "shadow-[0_10px_30px_rgba(15,23,42,0.06)]"
+      )}
     >
       {/* LOGO */}
-      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", lineHeight: 0 }}>
+      {/* Keep logo sizing controlled by max-height to prevent layout shifts */}
+      <Link href="/" className="flex items-center leading-none" style={{ textDecoration: "none" }}>
         <Image
           src="/instainject-logo.png"
           alt="InstaInject"
@@ -70,7 +63,7 @@ export default function Header({ onWalletConnect, walletAddress }: HeaderProps) 
       </Link>
 
       {/* NAV */}
-      <nav style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "center", flex: 1 }}>
+      <nav className="flex flex-1 flex-wrap items-center justify-center gap-1.5 px-2" aria-label="Primary">
         {navLinks.map(({ label, href }) => {
           const baseHref = href.split("#")[0];
           const active = pathname === baseHref || (baseHref === "/dashboard" && href.includes("#") && pathname === "/dashboard");
@@ -78,18 +71,15 @@ export default function Header({ onWalletConnect, walletAddress }: HeaderProps) 
             <Link
               key={label}
               href={href}
-              style={{
-                padding: "8px 14px",
-                borderRadius: "999px",
-                fontSize: "13px",
-                fontWeight: active ? 600 : 500,
-                color: active ? "var(--text-primary)" : "var(--text-muted)",
-                background: active ? "var(--surface-strong)" : "transparent",
-                border: `1px solid ${active ? "var(--card-border)" : "transparent"}`,
-                boxShadow: active ? "0 10px 24px rgba(37, 99, 235, 0.08)" : "none",
-                textDecoration: "none",
-                transition: "background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s",
-              }}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "rounded-full border px-3.5 py-2 text-[13px] font-medium",
+                "transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent-blue)_30%,transparent)]",
+                active
+                  ? "border-[var(--card-border)] bg-[var(--surface-strong)] text-[var(--text-primary)] shadow-[0_10px_24px_rgba(37,99,235,0.08)]"
+                  : "border-transparent bg-transparent text-[var(--text-muted)] hover:bg-[var(--surface-tint)] hover:text-[var(--text-primary)]"
+              )}
             >
               {label}
             </Link>
@@ -98,7 +88,7 @@ export default function Header({ onWalletConnect, walletAddress }: HeaderProps) 
       </nav>
 
       {/* RIGHT SIDE */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <ThemeToggle />
         {/* Network badge */}
         <div className="network-badge" id="network-badge" style={{ fontSize: "11px" }}>
@@ -109,28 +99,24 @@ export default function Header({ onWalletConnect, walletAddress }: HeaderProps) 
         {/* Wallet button */}
         <button
           id="connect-wallet-btn"
+          type="button"
           onClick={handleConnect}
           disabled={connecting}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "7px",
-            background: walletAddress ? "color-mix(in srgb, var(--accent-blue) 10%, var(--surface-strong))" : "var(--surface-strong)",
-            border: `1px solid ${walletAddress ? "color-mix(in srgb, var(--accent-blue) 22%, var(--card-border))" : "var(--card-border)"}`,
-            borderRadius: "999px",
-            padding: "9px 16px",
-            fontSize: "12px",
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontWeight: 600,
-            color: walletAddress ? "var(--accent-green)" : "var(--text-primary)",
-            cursor: connecting ? "not-allowed" : "pointer",
-            transition: "all 0.25s",
-            boxShadow: walletAddress ? "0 12px 24px rgba(37, 99, 235, 0.08)" : "0 8px 18px rgba(15, 23, 42, 0.05)",
-          }}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full border px-4 py-2.5",
+            "text-xs font-semibold",
+            "font-mono",
+            "transition-all",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color-mix(in_srgb,var(--accent-blue)_30%,transparent)]",
+            connecting ? "cursor-not-allowed opacity-70" : "cursor-pointer",
+            walletAddress
+              ? "border-[color-mix(in_srgb,var(--accent-blue)_22%,var(--card-border))] bg-[color-mix(in_srgb,var(--accent-blue)_10%,var(--surface-strong))] text-[var(--accent-green)] shadow-[0_12px_24px_rgba(37,99,235,0.08)]"
+              : "border-[var(--card-border)] bg-[var(--surface-strong)] text-[var(--text-primary)] shadow-[0_8px_18px_rgba(15,23,42,0.05)]"
+          )}
         >
           {walletAddress ? (
             <>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent-green)", boxShadow: "0 0 8px var(--accent-green)", display: "inline-block" }} />
+              <span className="inline-block h-[7px] w-[7px] rounded-full bg-[var(--accent-green)] shadow-[0_0_8px_var(--accent-green)]" />
               {truncate(walletAddress)}
             </>
           ) : connecting ? (

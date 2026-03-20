@@ -33,12 +33,14 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var isHome = false;
+                  try {
+                    isHome = window.location && window.location.pathname === '/';
+                  } catch (e) {}
+
                   var stored = localStorage.getItem('theme');
-                  if (stored === 'dark') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
-                  } else {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                  }
+                  var next = isHome ? 'dark' : (stored === 'dark' ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-theme', next);
                 } catch (e) {}
               })();
             `,

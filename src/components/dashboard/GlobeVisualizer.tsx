@@ -194,7 +194,12 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
     }));
   }, []);
 
-  const handleArcClick = useCallback((arc: any) => onArcClick?.(arc as Arc), [onArcClick]);
+  const handleArcClick = useCallback(
+    (arc: object) => {
+      onArcClick?.(arc as Arc);
+    },
+    [onArcClick]
+  );
   const labelColor = useCallback(
     (d: any) => (d.isAfrica ? "#10B981" : theme === "light" ? "#2563EB" : "#0EA5E9"),
     [theme]
@@ -202,7 +207,16 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
   const atmosphereColor = theme === "light" ? "#60A5FA" : "#6366F1";
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden" }}>
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+        cursor: onArcClick ? "pointer" : "default",
+      }}
+    >
       {dimensions.width > 0 && (
         <Globe
           ref={globeRef}
@@ -227,7 +241,7 @@ export default function GlobeVisualizer({ flashTrigger = 0, onArcClick }: Props)
           arcDashAnimateTime={3000}
           arcAltitudeAutoScale={0.35}
           arcStroke={1.2}
-          onArcClick={handleArcClick}
+          onArcClick={onArcClick ? handleArcClick : undefined}
 
           /* City Rings */
           ringsData={ringsData}
