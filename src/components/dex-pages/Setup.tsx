@@ -12,7 +12,7 @@ import {
     smartAccountAbi,
     vaultAbi
 } from "@/lib/contracts";
-import { useSessionKey } from "../hooks/useSessionKey";
+import { useSessionKey } from "@/hooks/useSessionKey";
 import InteractiveHoverButton from "@/components/ui/interactive-hover-button";
 
 type DurationOption = 3600 | 86400;
@@ -51,17 +51,14 @@ export default function Setup() {
             const next = new ethers.BrowserProvider(eth);
             await next.send("eth_requestAccounts", []);
 
-            // ✅ Check correct network
             const network = await next.getNetwork();
             if (Number(network.chainId) !== REQUIRED_CHAIN_ID) {
-                // Try to switch automatically
                 try {
                     await eth.request({
                         method: "wallet_switchEthereumChain",
-                        params: [{ chainId: "0x59F" }], // 1439 in hex
+                        params: [{ chainId: "0x59F" }], 
                     });
                 } catch (switchErr: any) {
-                    // Chain not added yet — add it
                     if (switchErr.code === 4902) {
                         await eth.request({
                             method: "wallet_addEthereumChain",
@@ -93,7 +90,6 @@ export default function Setup() {
         }
     }
 
-    // ✅ FIXED: Use native INJ deposit instead of USDT ERC-20
     async function depositUSDT() {
         if (!provider) {
             alert("Connect MetaMask first");
@@ -103,8 +99,6 @@ export default function Setup() {
         setDepositBusy(true);
         try {
             const signer = await provider.getSigner();
-
-            // Verify correct network
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== REQUIRED_CHAIN_ID) {
                 alert(`Wrong network!\n\nPlease switch MetaMask to:\nNetwork: Injective EVM Testnet\nChain ID: 1439\nRPC: https://k8s.testnet.json-rpc.injective.network`);
@@ -117,20 +111,14 @@ export default function Setup() {
             }
 
             const amount = depositAmount || "0.1";
-            console.log(`Depositing ${amount} INJ to vault: ${VAULT_ADDRESS}`);
-
-            // Send native INJ directly to vault
             const tx = await signer.sendTransaction({
                 to: VAULT_ADDRESS,
                 value: ethers.parseEther(amount),
                 gasLimit: 100000,
             });
 
-            console.log("Deposit tx sent:", tx.hash);
             await tx.wait();
-            console.log("Deposit confirmed:", tx.hash);
             setStep(3);
-
         } catch (err: any) {
             console.error("Deposit failed:", err);
             alert(`Deposit failed: ${err.message}`);
@@ -144,7 +132,6 @@ export default function Setup() {
         try {
             const signer = await provider.getSigner();
             const owner = await signer.getAddress();
-            console.log("Owner wallet:", owner);
 
             const factory = new ethers.Contract(
                 SMART_ACCOUNT_FACTORY,
@@ -152,34 +139,23 @@ export default function Setup() {
                 signer
             );
 
-            // Check existing account
             let account: string = await factory.accountOf(owner);
-            console.log("Existing SmartAccount:", account);
 
             if (account === ethers.ZeroAddress) {
-                console.log("No SmartAccount yet — creating one...");
                 const tx = await factory.createAccount(owner);
-                const receipt = await tx.wait();
-                console.log("createAccount tx:", receipt.hash);
-
-                // ✅ Fetch account address again after creation
+                await tx.wait();
                 account = await factory.accountOf(owner);
-                console.log("New SmartAccount:", account);
             }
 
             if (account === ethers.ZeroAddress) {
-                throw new Error("SmartAccount creation failed — address still zero");
+                throw new Error("SmartAccount creation failed");
             }
 
-            // Generate ephemeral session key
             const ephemeral = ethers.Wallet.createRandom();
-            console.log("Session key address:", ephemeral.address);
-
             const allowedPairHashes = pairs.map((p) =>
                 ethers.keccak256(ethers.toUtf8Bytes(p))
             );
 
-            // ✅ Use inline ABI to avoid any mismatch
             const smartAccount = new ethers.Contract(
                 account,
                 [
@@ -190,18 +166,11 @@ export default function Setup() {
                 signer
             );
 
-            // Verify owner before calling
             const storedOwner = await smartAccount.owner();
-            console.log("SmartAccount owner:", storedOwner);
-            console.log("My wallet:         ", owner);
-
             if (storedOwner.toLowerCase() !== owner.toLowerCase()) {
-                throw new Error(
-                    `Owner mismatch!\nSmartAccount owner: ${storedOwner}\nYour wallet: ${owner}\nRedeploy contracts with your wallet as deployer.`
-                );
+                throw new Error("Owner mismatch!");
             }
 
-            // ✅ Create session key on-chain
             const tx = await smartAccount.createSessionKey(
                 ephemeral.address,
                 duration,
@@ -209,9 +178,7 @@ export default function Setup() {
                 allowedPairHashes
             );
             await tx.wait();
-            console.log("Session key registered on-chain ✅");
 
-            // Save locally
             const expiry = Date.now() + duration * 1000;
             saveSession({
                 privateKey: ephemeral.privateKey,
@@ -223,8 +190,6 @@ export default function Setup() {
 
             setSessionAddress(ephemeral.address);
             setStep(4);
-            console.log("Setup complete! Session expires:", new Date(expiry).toLocaleString());
-
         } catch (err: any) {
             console.error("Session key failed:", err);
             alert(`Session key setup failed: ${err.message}`);
@@ -232,10 +197,7 @@ export default function Setup() {
     }
 
     async function addPaymasterStake() {
-        if (!provider || !PAYMASTER_ADDRESS) {
-            alert("Set NEXT_PUBLIC_PAYMASTER_CONTRACT in frontend env.");
-            return;
-        }
+        if (!provider || !PAYMASTER_ADDRESS) return;
         setFundingBusy(true);
         try {
             const signer = await provider.getSigner();
@@ -244,7 +206,7 @@ export default function Setup() {
                 value: ethers.parseEther(stakeInj || "0")
             });
             await tx.wait();
-            alert("Stake added to paymaster.");
+            alert("Stake added");
         } catch (err: any) {
             alert(`Stake failed: ${err.message}`);
         } finally {
@@ -253,10 +215,7 @@ export default function Setup() {
     }
 
     async function depositPaymasterGas() {
-        if (!provider || !PAYMASTER_ADDRESS) {
-            alert("Set VITE_PAYMASTER_CONTRACT in frontend env.");
-            return;
-        }
+        if (!provider || !PAYMASTER_ADDRESS) return;
         setFundingBusy(true);
         try {
             const signer = await provider.getSigner();
@@ -265,7 +224,7 @@ export default function Setup() {
                 value: ethers.parseEther(sponsorInj || "0")
             });
             await tx.wait();
-            alert("Paymaster deposit funded.");
+            alert("Deposit funded");
         } catch (err: any) {
             alert(`Deposit failed: ${err.message}`);
         } finally {
@@ -273,201 +232,243 @@ export default function Setup() {
         }
     }
 
-    function togglePair(pair: string) {
-        setPairs((prev) =>
-            prev.includes(pair) ? prev.filter((x) => x !== pair) : [...prev, pair]
-        );
-    }
-
     return (
-        <div className="space-y-4">
-            <section className="panel p-6 animate-rise">
-                <h2 className="text-2xl font-bold">Session Setup</h2>
-                <p className="mt-2 text-sm text-[var(--text-muted)]">
-                    One-time deposit and key setup. Then trade without MetaMask popups.
-                </p>
-            </section>
-
-            <section className="grid gap-4 lg:grid-cols-2">
-                {/* STEP 1 */}
-                <div className="panel p-5">
-                    <div className="mb-4 text-sm uppercase tracking-widest text-[var(--text-dimmed)]">Step 1</div>
-                    <InteractiveHoverButton
-                      text="Connect Wallet"
-                      loadingText="Connecting..."
-                      successText="Connected"
-                      onClick={() => connectWallet()}
-                      classes="h-11"
-                    />
-                    <p className="mt-3 text-sm">
-                        Wallet: <span className="font-mono">{walletAddress || "-"}</span>
+        <div className="mx-auto max-w-6xl space-y-8 pb-20">
+            {/* Header / Intro Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent/10 via-transparent to-transparent p-8 md:p-12">
+                <div className="relative z-10 max-w-2xl">
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+                        Vault <span className="text-accent">Setup</span>
+                    </h1>
+                    <p className="mt-4 text-lg text-muted-foreground">
+                        Configure your secure trading session on Injective inEVM. 
+                        Enable gasless, popup-free execution with a single setup flow.
                     </p>
-                    <p className="text-sm">
-                        Network: <span className="font-mono">{networkText}</span>
-                    </p>
-                    {/* ✅ Show warning if wrong network */}
-                    {provider && (
-                        <p className="mt-2 text-xs text-amber-400">
-                            Make sure MetaMask shows "Injective EVM Testnet" (Chain 1439)
-                        </p>
-                    )}
                 </div>
+                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+            </div>
 
-                {/* STEP 2 */}
-                <div className="panel p-5">
-                    <div className="mb-4 text-sm uppercase tracking-widest text-[var(--text-dimmed)]">Step 2</div>
-                    {/* ✅ Changed label from USDT to INJ */}
-                    <label className="block text-sm text-[var(--text-muted)]">
-                        Deposit INJ (native token)
-                    </label>
-                    <input
-                        value={depositAmount}
-                        onChange={(e) => setDepositAmount(e.target.value)}
-                        className="mt-2 w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-card)] px-3 py-2 font-mono"
-                        placeholder="0.1"
-                    />
-                    <p className="mt-1 text-xs text-[var(--text-dimmed)]">
-                        You have ~10.99 INJ testnet tokens available
-                    </p>
-                    <InteractiveHoverButton
-                        text="Deposit (only popup step)"
-                        loadingText="Depositing..."
-                        successText="Deposited"
-                        onClick={() => depositUSDT()}
-                        disabled={depositBusy || step < 2}
-                        classes="mt-3 h-11 border-accent/40 bg-accent/20 text-accent disabled:opacity-40"
-                    />
-                </div>
-            </section>
+            {/* Progress Stepper */}
+            <div className="flex items-center justify-between px-2">
+                {[1, 2, 3, 4].map((s) => (
+                    <div key={s} className="flex flex-1 items-center last:flex-none">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${
+                            step >= s ? "border-accent bg-accent text-white shadow-[0_0_15px_rgba(var(--accent),0.5)]" : "border-muted bg-muted/20 text-muted-foreground"
+                        }`}>
+                            {step > s ? "✓" : s}
+                        </div>
+                        {s < 4 && (
+                            <div className={`mx-4 h-0.5 flex-1 transition-all ${step > s ? "bg-accent" : "bg-muted"}`} />
+                        )}
+                    </div>
+                ))}
+            </div>
 
-            {/* OWNER ACTION - Fund Paymaster */}
-            <section className="panel p-5">
-                <div className="mb-4 text-sm uppercase tracking-widest text-[var(--text-dimmed)]">Owner Action</div>
-                <h3 className="text-lg font-semibold">Fund Paymaster</h3>
-                <p className="mt-1 text-sm text-[var(--text-muted)]">
-                    This requires the paymaster owner wallet. It uses MetaMask popups.
-                </p>
-                <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                    <div>
-                        <label className="block text-sm text-[var(--text-muted)]">Stake Amount (INJ)</label>
-                        <input
-                            value={stakeInj}
-                            onChange={(e) => setStakeInj(e.target.value)}
-                            className="mt-2 w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-card)] px-3 py-2 font-mono"
-                        />
+            {/* Main Content Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                
+                {/* STEP 1: Connect */}
+                <div className={`glass-card p-6 flex flex-col ${step === 1 ? "ring-2 ring-accent/50" : "opacity-80"}`}>
+                    <div className="mb-6 flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-widest text-accent">01. Identity</span>
+                        {step > 1 && <span className="text-accent">● Verified</span>}
+                    </div>
+                    <h3 className="text-xl font-bold">Connect Wallet</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">Connect your MetaMask to start.</p>
+                    
+                    <div className="mt-8 flex-1">
                         <InteractiveHoverButton
-                            text="Add Stake (1 day)"
-                            loadingText="Staking..."
-                            successText="Staked"
-                            onClick={() => addPaymasterStake()}
-                            disabled={fundingBusy}
-                            classes="mt-3 h-11 border-amber-400/40 bg-amber-400/20 text-amber-400 disabled:opacity-40"
+                            text="Connect Wallet"
+                            loadingText="Connecting..."
+                            successText="Connected"
+                            onClick={() => connectWallet()}
+                            classes="w-full h-12 text-sm font-semibold"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm text-[var(--text-muted)]">Gas Deposit (INJ)</label>
-                        <input
-                            value={sponsorInj}
-                            onChange={(e) => setSponsorInj(e.target.value)}
-                            className="mt-2 w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-card)] px-3 py-2 font-mono"
-                        />
+                    
+                    <div className="mt-6 flex flex-col gap-2 rounded-xl bg-black/20 p-4 font-mono text-[11px]">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">ADDRESS</span>
+                            <span className="truncate pl-4 text-foreground">{walletAddress || "Not Connected"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">NETWORK</span>
+                            <span className="text-foreground">{networkText}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* STEP 2: Deposit */}
+                <div className={`glass-card p-6 flex flex-col ${step === 2 ? "ring-2 ring-accent/50" : "opacity-80"}`}>
+                    <div className="mb-6 flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-widest text-accent">02. Funding</span>
+                        {step > 2 && <span className="text-accent">● Funded</span>}
+                    </div>
+                    <h3 className="text-xl font-bold">Vault Deposit</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">Deposit native INJ to your vault.</p>
+
+                    <div className="mt-8 space-y-4">
+                        <div className="relative">
+                            <input
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                                className="w-full rounded-xl border border-muted-foreground/20 bg-black/40 px-4 py-3 font-mono text-lg focus:border-accent focus:outline-none"
+                                placeholder="0.1"
+                                disabled={step < 2}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">INJ</span>
+                        </div>
+                        
                         <InteractiveHoverButton
-                            text="Deposit Sponsor Gas"
-                            loadingText="Depositing..."
+                            text="Deposit to Vault"
+                            loadingText="Processing..."
                             successText="Deposited"
-                            onClick={() => depositPaymasterGas()}
-                            disabled={fundingBusy}
-                            classes="mt-3 h-11 border-accent/40 bg-accent/20 text-accent disabled:opacity-40"
+                            onClick={() => depositUSDT()}
+                            disabled={depositBusy || step < 2}
+                            classes="w-full h-12 text-sm font-semibold disabled:opacity-30"
+                        />
+                    </div>
+                    
+                    <div className="mt-6 flex items-center gap-2 rounded-lg bg-amber-400/10 p-3 text-[10px] text-amber-200/80">
+                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[10px] text-black font-bold">!</span>
+                        <span>Depositing INJ enables the smart vault to execute trades.</span>
+                    </div>
+                </div>
+
+                {/* STEP 3: Session Key */}
+                <div className={`glass-card p-6 flex flex-col ${step === 3 ? "ring-2 ring-accent/50" : "opacity-80"}`}>
+                    <div className="mb-6 flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-widest text-accent">03. Policy</span>
+                        {step > 3 && <span className="text-accent">● Configured</span>}
+                    </div>
+                    <h3 className="text-xl font-bold">Session Security</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">Define limits for your session.</p>
+
+                    <div className="mt-6 space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground italic">DURATION</label>
+                            <div className="flex gap-2">
+                                {[3600, 86400].map((d) => (
+                                    <button
+                                        key={d}
+                                        onClick={() => setDuration(d as DurationOption)}
+                                        className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${duration === d ? "bg-accent text-white" : "bg-black/40 text-muted-foreground hover:bg-black/60"}`}
+                                    >
+                                        {d === 3600 ? "1 HOUR" : "24 HOURS"}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-muted-foreground italic">MAX TRADE (INJ)</label>
+                            <div className="flex gap-2">
+                                {[100, 500].map((m) => (
+                                    <button
+                                        key={m}
+                                        onClick={() => setMaxTrade(m as MaxOption)}
+                                        className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${maxTrade === m ? "bg-accent text-white" : "bg-black/40 text-muted-foreground hover:bg-black/60"}`}
+                                    >
+                                        {m}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <InteractiveHoverButton
+                            text="Generate Session Key"
+                            loadingText="Syncing..."
+                            successText="Key Active"
+                            onClick={() => configureSessionKey()}
+                            disabled={step < 3}
+                            classes="w-full h-12 text-sm font-semibold disabled:opacity-30"
                         />
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* STEP 3 - Session Key Config */}
-            <section className="panel p-5">
-                <div className="mb-4 text-sm uppercase tracking-widest text-[var(--text-dimmed)]">Step 3</div>
-                <div className="grid gap-4 lg:grid-cols-3">
-                    <div>
-                        <p className="mb-2 text-sm">Duration</p>
-                        <div className="flex gap-2">
-                            {[3600, 86400].map((d) => (
-                                <button
-                                    key={d}
-                                    onClick={() => setDuration(d as DurationOption)}
-                                    className={`rounded-lg px-3 py-1.5 ${duration === d ? "bg-accent/20 text-accent" : "bg-[var(--bg-card)] border border-[var(--card-border)]"}`}
-                                >
-                                    {d === 3600 ? "1h" : "24h"}
-                                </button>
-                            ))}
+            {/* ACTION FOOTER */}
+            <div className="grid gap-6 lg:grid-cols-3">
+                <div className="lg:col-span-2 glass-card p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-8 w-8 rounded-lg bg-amber-400/20 flex items-center justify-center">
+                            <span className="text-amber-400 font-bold text-lg">⚙</span>
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Protocol Maintenance</h3>
+                            <p className="text-sm text-muted-foreground">Configure the paymaster status.</p>
                         </div>
                     </div>
-                    <div>
-                        <p className="mb-2 text-sm">Max Trade Size</p>
-                        <div className="flex gap-2">
-                            {[100, 500].map((m) => (
-                                <button
-                                    key={m}
-                                    onClick={() => setMaxTrade(m as MaxOption)}
-                                    className={`rounded-lg px-3 py-1.5 ${maxTrade === m ? "bg-accent/20 text-accent" : "bg-[var(--bg-card)] border border-[var(--card-border)]"}`}
-                                >
-                                    {m} INJ
-                                </button>
-                            ))}
+
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-end">
+                                <label className="text-xs font-bold text-muted-foreground">STAKE AMOUNT</label>
+                            </div>
+                            <input
+                                value={stakeInj}
+                                onChange={(e) => setStakeInj(e.target.value)}
+                                className="w-full rounded-xl border border-muted-foreground/10 bg-black/20 px-4 py-2 font-mono"
+                                placeholder="0.02"
+                            />
+                            <InteractiveHoverButton
+                                text="Stake Paymaster"
+                                onClick={() => addPaymasterStake()}
+                                disabled={fundingBusy}
+                                classes="w-full h-10 text-xs border-amber-400/30 text-amber-200"
+                            />
                         </div>
-                    </div>
-                    <div>
-                        <p className="mb-2 text-sm">Allowed Pairs</p>
-                        <div className="flex flex-wrap gap-2">
-                            {PAIRS.map((pair) => (
-                                <label
-                                    key={pair}
-                                    className="flex items-center gap-2 rounded-lg bg-[var(--bg-card)] px-3 py-1.5 border border-[var(--card-border)]"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={pairs.includes(pair)}
-                                        onChange={() => togglePair(pair)}
-                                    />
-                                    <span>{pair}</span>
-                                </label>
-                            ))}
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-end">
+                                <label className="text-xs font-bold text-muted-foreground">GAS DEPOSIT</label>
+                            </div>
+                            <input
+                                value={sponsorInj}
+                                onChange={(e) => setSponsorInj(e.target.value)}
+                                className="w-full rounded-xl border border-muted-foreground/10 bg-black/20 px-4 py-2 font-mono"
+                                placeholder="0.10"
+                            />
+                            <InteractiveHoverButton
+                                text="Deposit Gas"
+                                onClick={() => depositPaymasterGas()}
+                                disabled={fundingBusy}
+                                classes="w-full h-10 text-xs border-accent/30 text-accent"
+                            />
                         </div>
                     </div>
                 </div>
-                <InteractiveHoverButton
-                    text="Generate Session Key"
-                    loadingText="Generating..."
-                    successText="Key Generated"
-                    onClick={() => configureSessionKey()}
-                    disabled={step < 3}
-                    classes="mt-4 h-11 bg-accent text-accent-foreground disabled:opacity-40"
-                />
-                {step < 3 && (
-                    <p className="mt-2 text-xs text-[var(--text-dimmed)]">Complete deposit first to unlock this step</p>
-                )}
-            </section>
 
-            {/* STEP 4 - Done */}
-            <section className="panel p-5">
-                <div className="mb-4 text-sm uppercase tracking-widest text-[var(--text-dimmed)]">Step 4</div>
-                <p className="text-lg font-semibold text-accent">Setup complete</p>
-                <p className="mt-1 text-sm">
-                    Session key: <span className="font-mono text-xs">{sessionAddress || session?.address || "-"}</span>
-                </p>
-                <p className="mt-1 text-sm">
-                    Countdown: <span className="font-mono">{remainingText}</span>
-                </p>
-                <InteractiveHoverButton
-                    text="Open trading terminal →"
-                    loadingText="Opening..."
-                    successText="Opened"
-                    onClick={() => router.push("/terminal")}
-                    disabled={step < 4}
-                    classes="mt-4 h-11 border-[var(--card-border)] bg-[var(--bg-card)] disabled:opacity-40"
-                />
-            </section>
+                <div className={`glass-card p-6 flex flex-col justify-between transition-all duration-500 ${step >= 4 ? "bg-accent/10 border-accent/40 scale-105" : "opacity-40 grayscale pointer-events-none"}`}>
+                    <div>
+                        <div className="mb-4 h-12 w-12 rounded-2xl bg-accent flex items-center justify-center text-white text-2xl animate-pulse">
+                            ⚡
+                        </div>
+                        <h3 className="text-2xl font-bold">Ready to Trade</h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                            Your session is active. Zero popups, zero friction.
+                        </p>
+                    </div>
 
-            <p className="text-xs text-[var(--text-dimmed)]">Current step: {step}/4</p>
+                    <div className="mt-8 space-y-4">
+                        <div className="font-mono text-[10px] space-y-1 bg-black/30 p-3 rounded-lg border border-white/5">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground uppercase">SESSION</span>
+                                <span className="text-accent truncate pl-4">{sessionAddress || session?.address || "ACTIVE"}</span>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => router.push("/trade")}
+                            className="w-full rounded-2xl bg-accent py-4 font-bold text-white shadow-[0_4px_20px_rgba(var(--accent),0.4)] transition-all hover:scale-105 active:scale-95"
+                        >
+                            Enter Terminal →
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <p className="text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50">
+                Network: inEVM Testnet (1439) • Powered by Injective
+            </p>
         </div>
     );
 }

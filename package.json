@@ -25,12 +25,16 @@
     "three": "^0.183.2"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "@account-abstraction/contracts": "^0.8.0",
+    "@nomicfoundation/hardhat-ethers": "^4.0.0",
     "@tailwindcss/postcss": "^4",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.183.1",
+    "chai": "^6.2.2",
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.7",

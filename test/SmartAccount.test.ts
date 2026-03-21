@@ -29,6 +29,14 @@ describe("SmartAccount", function () {
         const account = await SmartAccount.deploy(owner.address, owner.address);
         await account.waitForDeployment();
 
-        await expect(account.connect(other).execute(other.address, 0, "0x")).to.be.revertedWith("only entrypoint");
+        let reverted = false;
+        try {
+            await account.connect(other).execute(other.address, 0, "0x");
+        } catch (err: unknown) {
+            reverted = true;
+            expect(String(err)).to.include("only entrypoint");
+        }
+
+        expect(reverted).to.eq(true);
     });
 });

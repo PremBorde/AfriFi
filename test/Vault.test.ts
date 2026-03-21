@@ -22,7 +22,18 @@ describe("Vault", function () {
         await vault.setApprovedSmartAccount(smart.address, true);
         const pair = ethers.keccak256(ethers.toUtf8Bytes("INJ/USDT"));
 
-        await expect(vault.connect(smart).executeTrade(user.address, pair, 10_000000, 0))
-            .to.emit(vault, "TradeRequested");
+        const tx = await vault.connect(smart).executeTrade(user.address, pair, 10_000000, 0);
+        const receipt = await tx.wait();
+
+        const logs = receipt?.logs ?? [];
+        const emitted = logs.some((log: any) => {
+            try {
+                return vault.interface.parseLog(log).name === "TradeRequested";
+            } catch {
+                return false;
+            }
+        });
+
+        expect(emitted).to.eq(true);
     });
 });

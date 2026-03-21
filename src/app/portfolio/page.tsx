@@ -1,5 +1,5 @@
 "use client";
-import DexPortfolio from "@/components/dex/Portfolio";
+import DexPortfolio from "@/components/dex-pages/Portfolio";
 import Header from "@/components/layout/Header";
 
 export default function PortfolioPage() {

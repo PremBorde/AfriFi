@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
-import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-ethers";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -8,7 +8,7 @@ const config: HardhatUserConfig = {
     solidity: {
         compilers: [
             {
-                version: "0.8.23",
+                version: "0.8.28",
                 settings: {
                     optimizer: { enabled: true, runs: 200 }
                 }
@@ -17,10 +17,11 @@ const config: HardhatUserConfig = {
     },
     networks: {
         inEvmTestnet: {
+            type: "http",
             url: process.env.INEVM_RPC_URL || "https://testnet.rpc.injective.network",
             chainId: Number(process.env.INEVM_CHAIN_ID || 1439),
             accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
-        } as any // Adding 'as any' bypasses the strict 'type' requirement check
+        }
     },
     paths: {
         sources: "./contracts",
